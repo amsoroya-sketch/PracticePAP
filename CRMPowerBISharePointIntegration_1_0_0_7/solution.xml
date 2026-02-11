@@ -5,8 +5,8 @@
       <LocalizedName description="CRM-Power BI-SharePoint Integration" languagecode="1033" />
     </LocalizedNames>
     <Descriptions />
-    <Version>1.0.0.5</Version>
-    <Managed>1</Managed>
+    <Version>1.0.0.7</Version>
+    <Managed>0</Managed>
     <Publisher>
       <UniqueName>Cr503a4</UniqueName>
       <LocalizedNames>
