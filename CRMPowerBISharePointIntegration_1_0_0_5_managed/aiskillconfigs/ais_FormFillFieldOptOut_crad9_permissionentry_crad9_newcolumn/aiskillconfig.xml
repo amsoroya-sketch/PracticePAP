@@ -1,0 +1,15 @@
+<aiskillconfig uniquename="ais_FormFillFieldOptOut_crad9_permissionentry_crad9_newcolumn">
+  <aiskill>FormFillFieldOptOut</aiskill>
+  <attribute>
+    <entityid.logicalname>crad9_permissionentry</entityid.logicalname>
+    <logicalname>crad9_newcolumn</logicalname>
+  </attribute>
+  <description>crad9_PermissionEntry - New column Form fill opt out</description>
+  <entity>
+    <logicalname>crad9_permissionentry</logicalname>
+  </entity>
+  <iscustomizable>1</iscustomizable>
+  <scope>1</scope>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</aiskillconfig>

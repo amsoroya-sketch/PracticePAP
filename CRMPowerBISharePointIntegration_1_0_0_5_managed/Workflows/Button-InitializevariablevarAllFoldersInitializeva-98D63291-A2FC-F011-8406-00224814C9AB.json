@@ -1,0 +1,580 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "sp_sharedcommondataserviceforapps_c8a4c"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_sharepointonline": {
+        "runtimeSource": "invoker",
+        "connection": {
+          "connectionReferenceLogicalName": "sp_sharedsharepointonline_e7162"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      },
+      "shared_sharepointonline-1": {
+        "runtimeSource": "invoker",
+        "connection": {
+          "connectionReferenceLogicalName": "crad9_sharedsharepointonline_70c11"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "668f87b9-0928-4abe-9669-995db353cc07"
+          },
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "title": "BaseFolderURL",
+                  "type": "string",
+                  "x-ms-dynamically-added": true,
+                  "description": "SharePoint folder URL (e.g., https://contoso.sharepoint.com/sites/HR/Documents/Policies)\"",
+                  "x-ms-content-hint": "TEXT"
+                }
+              },
+              "required": [
+                "text"
+              ]
+            }
+          }
+        }
+      },
+      "actions": {
+        "Initialize_variable_varAllFolders": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "dbc55c34-df61-4d43-9994-174a15fe1171"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varAllItems",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Initialize_variable_varBrokenPermissionItems": {
+          "runAfter": {
+            "Initialize_variable_varAllFolders": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "bcd7e6b8-83d7-456c-aa3f-a996c891d5af"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varBrokenPermissionItems",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Initialize_scan_Id": {
+          "runAfter": {
+            "Initialize_variable_varBrokenPermissionItems": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "68fdbb37-6c16-4960-87bd-59019edb9804"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varScanID",
+                "type": "string",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "Initialize_varErrorMessage": {
+          "runAfter": {
+            "Initialize_scan_Id": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b0ae9318-5820-4e20-8309-7dd6845f5d83"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varErrorMessage",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initialize_varTotalItemsProcessed": {
+          "runAfter": {
+            "Initialize_varErrorMessage": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "12878685-b541-4859-a9bb-ada62ea82009"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varTotalItemsProcessed",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "Initialize_varFlowStatus": {
+          "runAfter": {
+            "Initialize_varTotalItemsProcessed": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "init-var-flowstatus"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varFlowStatus",
+                "type": "string",
+                "value": "Started"
+              }
+            ]
+          }
+        },
+        "Try_Scope": {
+          "actions": {
+            "Get_Site_URL": {
+              "metadata": {
+                "operationMetadataId": "aafb0007-6f2c-451a-a7fc-e684ce96145d"
+              },
+              "type": "Compose",
+              "inputs": "@concat(split(triggerBody()['text'], '/sites/')[0], '/sites/', split(split(triggerBody()['text'], '/sites/')[1], '/')[0])"
+            },
+            "Get_Library_Name": {
+              "runAfter": {
+                "Get_Site_URL": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "e7004942-4602-4889-8650-a902c7d3cbad"
+              },
+              "type": "Compose",
+              "inputs": "@split(split(triggerBody()['text'], '/sites/')[1], '/')[1]"
+            },
+            "Get_Folder_Path": {
+              "runAfter": {
+                "Get_Library_Name": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "aab2f0e9-7825-4c4d-9c04-898245270839"
+              },
+              "type": "Compose",
+              "inputs": "@replace(triggerBody()['text'], concat(split(triggerBody()['text'], '/sites/')[0], '/sites/', split(split(triggerBody()['text'], '/sites/')[1], '/')[0], '/', split(split(triggerBody()['text'], '/sites/')[1], '/')[1]), '')"
+            },
+            "Get_Library_URL_Path_": {
+              "runAfter": {
+                "Get_Folder_Path": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "57c3a9cc-abab-45a0-8c00-0a2a38e160fd"
+              },
+              "type": "Compose",
+              "inputs": "@concat('/sites/', split(split(triggerBody()['text'], '/sites/')[1], '/')[0], '/', decodeUriComponent(split(split(triggerBody()['text'], '/sites/')[1], '/')[1]))"
+            },
+            "Create_Scan_Record": {
+              "runAfter": {
+                "Get_Library_URL_Path_": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "e523721a-3c09-428d-b784-f6e389149d3d"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "crad9_scansessions",
+                  "item/crad9_name": "@outputs('Get_Site_URL')",
+                  "item/crad9_libraryname": "@outputs('Get_Library_Name')",
+                  "item/crad9_rootfolderpath": "@outputs('Get_Folder_Path')",
+                  "item/crad9_scanstarttime": "@utcNow()",
+                  "item/crad9_scanstatus": 117160000,
+                  "item/crad9_siteurl": "@outputs('Get_Site_URL')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps"
+                }
+              }
+            },
+            "Set_variable": {
+              "runAfter": {
+                "Create_Scan_Record": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "d4775097-ee88-400f-a177-ef1c8b819347"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "varScanID",
+                "value": "@outputs('Create_Scan_Record')?['body/crad9_scansessionid']"
+              }
+            },
+            "Get_Server_Relative_Folder_Path": {
+              "runAfter": {
+                "Set_variable": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "bbe93994-46f8-4bf4-801d-dd7796ac3d25"
+              },
+              "type": "Compose",
+              "inputs": "@concat(outputs('Get_Library_URL_Path_'), outputs('Get_Folder_Path'))"
+            },
+            "Get_All_SubItems": {
+              "runAfter": {
+                "Get_Server_Relative_Folder_Path": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "c64d0d28-26c3-4cf3-9088-cdbea2983564"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@{outputs('Get_Site_URL')}",
+                  "parameters/method": "GET",
+                  "parameters/uri": "@concat('/_api/web/GetList(''', outputs('Get_Library_URL_Path_'), ''')/items?$filter=startswith(FileRef,''', outputs('Get_Server_Relative_Folder_Path'), ''')&$select=ID,FileLeafRef,FileRef,UniqueId,FSObjType,HasUniqueRoleAssignments&$top=5000')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "HttpRequest",
+                  "connectionName": "shared_sharepointonline"
+                }
+              }
+            },
+            "varAllItems": {
+              "runAfter": {
+                "Get_All_SubItems": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "097b404c-90ea-48b5-9482-21be7fb729c2"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "varAllItems",
+                "value": "@body('Get_All_SubItems')?['d']?['results']"
+              }
+            },
+            "filter_Unique_permission_Items": {
+              "runAfter": {
+                "varAllItems": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "0bf06141-e2e8-48fa-80c7-383b6515dc04"
+              },
+              "type": "Query",
+              "inputs": {
+                "from": "@variables('varAllItems')",
+                "where": "@equals(item()?['HasUniqueRoleAssignments'], true)"
+              }
+            },
+            "Set_varBrokenPermissionItems": {
+              "runAfter": {
+                "filter_Unique_permission_Items": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "4cb493ab-b30d-4853-b10b-46b564d37c43"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "varBrokenPermissionItems",
+                "value": "@body('filter_Unique_permission_Items')"
+              }
+            },
+            "Process_Broken_Items": {
+              "foreach": "@variables('varBrokenPermissionItems')",
+              "actions": {
+                "Get_Role_Assignments": {
+                  "metadata": {
+                    "operationMetadataId": "73c9a23c-ff06-4a04-aa77-4189e168b1e6"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "@outputs('Get_Site_URL')",
+                      "parameters/method": "GET",
+                      "parameters/uri": "@concat('/_api/web/', if(equals(items('Process_Broken_Items')?['FSObjType'], 1), 'GetFolderByServerRelativeUrl', 'GetFileByServerRelativeUrl'), '(''', items('Process_Broken_Items')?['FileRef'], ''')/ListItemAllFields/RoleAssignments?$expand=Member,RoleDefinitionBindings')",
+                      "parameters/headers": {
+                        "Accept": "application/json;odata=verbose"
+                      }
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "HttpRequest",
+                      "connectionName": "shared_sharepointonline-1"
+                    }
+                  }
+                },
+                "Process_Each_Permission": {
+                  "foreach": "@outputs('Get_Role_Assignments')?['body']?['d']?['results']",
+                  "actions": {
+                    "Create_a_Permission_entry": {
+                      "metadata": {
+                        "operationMetadataId": "f2370810-b02b-42d4-b974-93a596610d7b"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "crad9_permissionentries",
+                          "item/crad9_newcolumn": "ss",
+                          "item/crad9_itemlevel": "@sub(length(items('Process_Broken_Items')?['FileRef']), length(replace(items('Process_Broken_Items')?['FileRef'], '/', '')))",
+                          "item/crad9_itemname": "@items('Process_Broken_Items')?['FileLeafRef']",
+                          "item/crad9_itempath": "@items('Process_Broken_Items')?['FileRef']",
+                          "item/crad9_itemuniqueid": "@items('Process_Broken_Items')?['UniqueId']",
+                          "item/crad9_itemurl": "@concat(outputs('Get_Site_URL'), items('Process_Broken_Items')?['FileRef'])",
+                          "item/crad9_libraryname": "@outputs('Get_Library_Name')",
+                          "item/crad9_loginname": "@items('Process_Each_Permission')?['Member']?['LoginName']",
+                          "item/crad9_permissionlevel": "@first(items('Process_Each_Permission')?['RoleDefinitionBindings']?['results'])?['Name']",
+                          "item/crad9_principalname": "@items('Process_Each_Permission')?['Member']?['Title']",
+                          "item/crad9_principaltype": "@if(equals(items('Process_Each_Permission')?['Member']?['PrincipalType'], 1), 'User', if(equals(items('Process_Each_Permission')?['Member']?['PrincipalType'], 4), 'Security Group', if(equals(items('Process_Each_Permission')?['Member']?['PrincipalType'], 8), 'SharePoint Group', 'Unknown')))",
+                          "item/crad9_scanid@odata.bind": "@concat('/crad9_scansessions(', variables('varScanID'), ')')",
+                          "item/crad9_siteurl": "@outputs('Get_Site_URL')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "CreateRecord",
+                          "connectionName": "shared_commondataserviceforapps"
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Get_Role_Assignments": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "87470d21-001a-4e71-ac4a-7a6b468e381c"
+                  },
+                  "type": "Foreach"
+                }
+              },
+              "runAfter": {
+                "Set_varBrokenPermissionItems": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "d6601524-dc6f-4e3d-b134-1770806a8aff"
+              },
+              "type": "Foreach",
+              "runtimeConfiguration": {
+                "concurrency": {
+                  "repetitions": 1
+                }
+              }
+            },
+            "Set_Flow_Status_Success": {
+              "runAfter": {
+                "Process_Broken_Items": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "set-flow-status-success"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "varFlowStatus",
+                "value": "Success"
+              }
+            }
+          },
+          "runAfter": {
+            "Initialize_varFlowStatus": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "try-scope-main"
+          },
+          "type": "Scope"
+        },
+        "Catch_Scope": {
+          "actions": {
+            "Set_Flow_Status_Failed": {
+              "metadata": {
+                "operationMetadataId": "set-flow-status-failed"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "varFlowStatus",
+                "value": "Failed"
+              }
+            }
+          },
+          "runAfter": {
+            "Try_Scope": [
+              "Failed",
+              "TimedOut"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "catch-scope-error-handling"
+          },
+          "type": "Scope",
+          "description": "Error handling - captures flow failures"
+        },
+        "Finally_Scope": {
+          "actions": {
+            "Condition_Check_Status": {
+              "actions": {
+                "Update_Scan_Success": {
+                  "metadata": {
+                    "operationMetadataId": "update-scan-success"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "crad9_scansessions",
+                      "recordId": "@variables('varScanID')",
+                      "item/crad9_folderswithbrokenpermissions": "@length(variables('varBrokenPermissionItems'))",
+                      "item/crad9_scanendtime": "@utcNow()",
+                      "item/crad9_scanstatus": 117160001,
+                      "item/crad9_totalfoldersscanned": "@length(variables('varAllItems'))"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "UpdateRecord",
+                      "connectionName": "shared_commondataserviceforapps"
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {
+                  "Update_Scan_Failed": {
+                    "metadata": {
+                      "operationMetadataId": "update-scan-failed"
+                    },
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "parameters": {
+                        "entityName": "crad9_scansessions",
+                        "recordId": "@variables('varScanID')",
+                        "item/crad9_errormessage": "@concat('Flow failed at: ', utcNow())",
+                        "item/crad9_scanendtime": "@utcNow()",
+                        "item/crad9_scanstatus": 117160002
+                      },
+                      "host": {
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                        "operationId": "UpdateRecord",
+                        "connectionName": "shared_commondataserviceforapps"
+                      }
+                    }
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@variables('varFlowStatus')",
+                      "Success"
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "condition-check-status"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Try_Scope": [
+              "Succeeded",
+              "Failed",
+              "Skipped",
+              "TimedOut"
+            ],
+            "Catch_Scope": [
+              "Succeeded",
+              "Failed",
+              "Skipped",
+              "TimedOut"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "finally-scope-cleanup"
+          },
+          "type": "Scope",
+          "description": "Always runs - updates scan record with final status"
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}
