@@ -317,6 +317,26 @@
             },
             "Detect_Level": {
               "actions": {
+                "Check_Parentheses_Pattern": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "check-parentheses-pattern"
+                  },
+                  "type": "Compose",
+                  "inputs": "@and(and(greater(indexOf(outputs('Extract_Folder_Name'), '('), -1), greater(indexOf(outputs('Extract_Folder_Name'), ')'), -1)), and(less(indexOf(outputs('Extract_Folder_Name'), '('), lastIndexOf(outputs('Extract_Folder_Name'), ')')), greater(sub(lastIndexOf(outputs('Extract_Folder_Name'), ')'), indexOf(outputs('Extract_Folder_Name'), '(')), 1)))"
+                },
+                "Check_Brackets_Pattern": {
+                  "runAfter": {
+                    "Check_Parentheses_Pattern": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "check-brackets-pattern"
+                  },
+                  "type": "Compose",
+                  "inputs": "@and(and(greater(indexOf(outputs('Extract_Folder_Name'), '['), -1), greater(indexOf(outputs('Extract_Folder_Name'), ']'), -1)), and(less(indexOf(outputs('Extract_Folder_Name'), '['), lastIndexOf(outputs('Extract_Folder_Name'), ']')), greater(sub(lastIndexOf(outputs('Extract_Folder_Name'), ']'), indexOf(outputs('Extract_Folder_Name'), '[')), 1)))"
+                },
                 "Check_Level_2_Parentheses": {
                   "actions": {
                     "Set_Level_2": {
@@ -330,7 +350,11 @@
                       }
                     }
                   },
-                  "runAfter": {},
+                  "runAfter": {
+                    "Check_Brackets_Pattern": [
+                      "Succeeded"
+                    ]
+                  },
                   "else": {
                     "actions": {
                       "Check_Level_3_Brackets": {
@@ -348,19 +372,9 @@
                         },
                         "runAfter": {},
                         "expression": {
-                          "and": [
-                            {
-                              "contains": [
-                                "@outputs('Extract_Folder_Name')",
-                                "["
-                              ]
-                            },
-                            {
-                              "contains": [
-                                "@outputs('Extract_Folder_Name')",
-                                "]"
-                              ]
-                            }
+                          "equals": [
+                            "@outputs('Check_Brackets_Pattern')",
+                            true
                           ]
                         },
                         "metadata": {
@@ -371,19 +385,9 @@
                     }
                   },
                   "expression": {
-                    "and": [
-                      {
-                        "contains": [
-                          "@outputs('Extract_Folder_Name')",
-                          "("
-                        ]
-                      },
-                      {
-                        "contains": [
-                          "@outputs('Extract_Folder_Name')",
-                          ")"
-                        ]
-                      }
+                    "equals": [
+                      "@outputs('Check_Parentheses_Pattern')",
+                      true
                     ]
                   },
                   "metadata": {
