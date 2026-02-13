@@ -184,6 +184,26 @@
             ]
           }
         },
+        "Initialize_varLevel": {
+          "runAfter": {
+            "Initialize_varFlowStatus": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "init-var-level"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varLevel",
+                "type": "integer",
+                "value": 1
+              }
+            ]
+          }
+        },
         "Try_Scope": {
           "actions": {
             "Get_Site_URL": {
@@ -283,9 +303,108 @@
               "type": "Compose",
               "inputs": "@concat(outputs('Get_Library_URL_Path_'), outputs('Get_Folder_Path'))"
             },
-            "Get_All_SubItems": {
+            "Extract_Folder_Name": {
               "runAfter": {
                 "Get_Server_Relative_Folder_Path": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "extract-folder-name"
+              },
+              "type": "Compose",
+              "inputs": "@if(equals(length(outputs('Get_Folder_Path')), 0), '', last(split(outputs('Get_Folder_Path'), '/')))"
+            },
+            "Detect_Level": {
+              "actions": {
+                "Check_Level_2_Parentheses": {
+                  "actions": {
+                    "Set_Level_2": {
+                      "metadata": {
+                        "operationMetadataId": "set-level-2"
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "varLevel",
+                        "value": 2
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "else": {
+                    "actions": {
+                      "Check_Level_3_Brackets": {
+                        "actions": {
+                          "Set_Level_3": {
+                            "metadata": {
+                              "operationMetadataId": "set-level-3"
+                            },
+                            "type": "SetVariable",
+                            "inputs": {
+                              "name": "varLevel",
+                              "value": 3
+                            }
+                          }
+                        },
+                        "runAfter": {},
+                        "expression": {
+                          "and": [
+                            {
+                              "contains": [
+                                "@outputs('Extract_Folder_Name')",
+                                "["
+                              ]
+                            },
+                            {
+                              "contains": [
+                                "@outputs('Extract_Folder_Name')",
+                                "]"
+                              ]
+                            }
+                          ]
+                        },
+                        "metadata": {
+                          "operationMetadataId": "check-level-3"
+                        },
+                        "type": "If"
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "contains": [
+                          "@outputs('Extract_Folder_Name')",
+                          "("
+                        ]
+                      },
+                      {
+                        "contains": [
+                          "@outputs('Extract_Folder_Name')",
+                          ")"
+                        ]
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "check-level-2"
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "Extract_Folder_Name": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "detect-level"
+              },
+              "type": "Scope"
+            },
+            "Get_All_SubItems": {
+              "runAfter": {
+                "Detect_Level": [
                   "Succeeded"
                 ]
               },
@@ -306,9 +425,21 @@
                 }
               }
             },
-            "varAllItems": {
+            "Filter_By_Level": {
               "runAfter": {
                 "Get_All_SubItems": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "filter-by-level"
+              },
+              "type": "Compose",
+              "inputs": "@if(equals(variables('varLevel'), 1), body('Get_All_SubItems')?['d']?['results'], if(equals(variables('varLevel'), 2), filter(body('Get_All_SubItems')?['d']?['results'], equals(length(split(item()?['FileRef'], '/')), add(length(split(outputs('Get_Server_Relative_Folder_Path'), '/')), 1))), filter(body('Get_All_SubItems')?['d']?['results'], equals(length(split(item()?['FileRef'], '/')), add(length(split(outputs('Get_Server_Relative_Folder_Path'), '/')), 2)))))"
+            },
+            "varAllItems": {
+              "runAfter": {
+                "Filter_By_Level": [
                   "Succeeded"
                 ]
               },
@@ -318,7 +449,7 @@
               "type": "SetVariable",
               "inputs": {
                 "name": "varAllItems",
-                "value": "@body('Get_All_SubItems')?['d']?['results']"
+                "value": "@outputs('Filter_By_Level')"
               }
             },
             "filter_Unique_permission_Items": {
@@ -451,7 +582,7 @@
             }
           },
           "runAfter": {
-            "Initialize_varFlowStatus": [
+            "Initialize_varLevel": [
               "Succeeded"
             ]
           },
