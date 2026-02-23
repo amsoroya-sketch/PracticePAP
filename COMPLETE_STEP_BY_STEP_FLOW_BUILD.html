@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Step-by-Step Flow Build - Permission Scanner</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #0078d4;
+            border-bottom: 3px solid #0078d4;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #005a9e;
+            margin-top: 40px;
+            background-color: #0078d4;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+        }
+        h3 {
+            color: #323130;
+            margin-top: 30px;
+            border-left: 5px solid #0078d4;
+            padding-left: 15px;
+        }
+        h4 {
+            color: #605e5c;
+            margin-top: 20px;
+        }
+        .action-block {
+            background-color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            border-left: 6px solid #0078d4;
+        }
+        .action-header {
+            background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            margin: -25px -25px 20px -25px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        .action-number {
+            background-color: white;
+            color: #0078d4;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .code-block {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+        .expression-box {
+            background-color: #fffbea;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+        .expression-label {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            background-color: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #0078d4;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .info-box {
+            background-color: #e6f3ff;
+            border-left: 5px solid #0078d4;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .warning-box {
+            background-color: #fff4ce;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .success-box {
+            background-color: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .step-indicator {
+            background-color: #0078d4;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .field-row {
+            background-color: #f8f9fa;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border-left: 3px solid #0078d4;
+        }
+        .field-name {
+            color: #0078d4;
+            font-weight: bold;
+            font-family: 'Consolas', monospace;
+        }
+        .screenshot-placeholder {
+            background-color: #e9ecef;
+            border: 2px dashed #6c757d;
+            padding: 40px;
+            text-align: center;
+            margin: 15px 0;
+            border-radius: 8px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        .nav-toc {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-toc h3 {
+            margin-top: 0;
+            border-left: none;
+            padding-left: 0;
+        }
+        .nav-toc a {
+            display: block;
+            padding: 8px 0;
+            color: #0078d4;
+            text-decoration: none;
+            transition: padding-left 0.2s;
+        }
+        .nav-toc a:hover {
+            padding-left: 10px;
+            text-decoration: underline;
+        }
+        code {
+            background-color: #f0f0f0;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: #c7254e;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🔨 Complete Step-by-Step Flow Build Guide</h1>
+<p><strong>Permission Scanner Flow - Detailed Action-by-Action Instructions with Code Snippets</strong></p>
+
+<div class="success-box" style="background-color: #d4edda; border: 3px solid #28a745; padding: 20px; margin: 20px 0; border-radius: 8px;">
+    <h3 style="margin-top: 0; color: #155724;">⭐ UPDATED: 2026-02-23 - Dynamic Configuration Extraction</h3>
+    <p style="color: #155724; font-size: 1.1em; margin: 10px 0;">
+        <strong>NEW in this version:</strong> Two Compose actions (7a and 7b) <strong>dynamically extract</strong> library name and site path from folder URL.
+    </p>
+    <ul style="color: #155724; line-height: 1.8;">
+        <li><strong>Action 7a:</strong> Config_List_Title - Extracts library name from URL (e.g., "Meetings", "Documents")</li>
+        <li><strong>Action 7b:</strong> Config_Site_Path_Prefix - Builds site path from URL (e.g., "/sites/Permission-Scanner-Test")</li>
+        <li><strong>Action 12:</strong> Updated to reference both dynamic config variables</li>
+        <li><strong>Action 19:</strong> Updated to reference Config_List_Title</li>
+    </ul>
+    <p style="color: #155724; margin: 10px 0;">
+        <strong>Benefits:</strong> Zero configuration | Works with ANY library/site automatically | Multi-library support | Future-proof
+    </p>
+    <p style="color: #155724; margin: 10px 0;">
+        <strong>📖 See also:</strong> <code>DYNAMIC_CONFIG_EXTRACTION.md</code> for complete details
+    </p>
+</div>
+
+<div class="error-box" style="background-color: #fff3cd; border: 3px solid #ffc107; padding: 25px; margin: 25px 0; border-radius: 8px;">
+    <h2 style="margin-top: 0; color: #856404; background: none; padding: 0;">⚠️ CRITICAL: When to Use Expression Tab vs. Direct Entry</h2>
+
+    <h3 style="color: #856404; border-left: none; padding-left: 0; margin-top: 20px;">📝 Rule of Thumb:</h3>
+    <table style="width: 100%; border: 1px solid #ddd;">
+        <tr style="background-color: #f8f9fa;">
+            <th style="padding: 12px; border: 1px solid #ddd;">Field Type</th>
+            <th style="padding: 12px; border: 1px solid #ddd;">How to Enter</th>
+            <th style="padding: 12px; border: 1px solid #ddd;">Example</th>
+        </tr>
+        <tr>
+            <td style="padding: 10px; border: 1px solid #ddd;"><strong>SharePoint HTTP Uri Fields</strong></td>
+            <td style="padding: 10px; border: 1px solid #ddd;">✅ <strong>Type DIRECTLY</strong> in the field<br>(Power Automate auto-converts @{} to dynamic content)</td>
+            <td style="padding: 10px; border: 1px solid #ddd; font-family: monospace; font-size: 11px;">_api/web/lists/GetByTitle('Meetings')/items</td>
+        </tr>
+        <tr style="background-color: #f8f9fa;">
+            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Power Automate Functions</strong><br>(concat, split, join, if, etc.)</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">✅ <strong>Use Expression Tab</strong></td>
+            <td style="padding: 10px; border: 1px solid #ddd; font-family: monospace; font-size: 11px;">concat('Scan - ', utcNow())</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Simple Dynamic Content</strong><br>(field references with @)</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">✅ <strong>Use Expression Tab</strong><br>OR click Dynamic Content panel</td>
+            <td style="padding: 10px; border: 1px solid #ddd; font-family: monospace; font-size: 11px;">@outputs('Get_Meeting_Record')?['body/crad9_meetingid']</td>
+        </tr>
+        <tr style="background-color: #f8f9fa;">
+            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Mixed Text + Dynamic Content</strong><br>(URIs with embedded expressions)</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">✅ <strong>Type DIRECTLY</strong> in the field<br>(Power Automate auto-detects @{} syntax)</td>
+            <td style="padding: 10px; border: 1px solid #ddd; font-family: monospace; font-size: 11px;">items(@{items('Apply_to_each_Item')?['Id']})</td>
+        </tr>
+    </table>
+
+    <h3 style="color: #856404; border-left: none; padding-left: 0; margin-top: 25px;">🚫 Common Mistakes:</h3>
+    <ul style="line-height: 1.8;">
+        <li><strong>❌ DON'T</strong>: Try to enter SharePoint URIs in the Expression tab - it will show "invalid expression"</li>
+        <li><strong>❌ DON'T</strong>: Wrap SharePoint URIs in quotes when typing directly (e.g., <code>'_api/web/...'</code>)</li>
+        <li><strong>✅ DO</strong>: Type SharePoint URIs directly in the Uri field, including any <code>@{...}</code> parts</li>
+        <li><strong>✅ DO</strong>: Use Expression tab for Power Automate functions like <code>concat()</code>, <code>split()</code>, <code>if()</code></li>
+    </ul>
+
+    <h3 style="color: #856404; border-left: none; padding-left: 0; margin-top: 25px;">📸 Visual Example:</h3>
+    <div style="background-color: white; padding: 15px; border-radius: 6px; border: 2px solid #ddd; margin-top: 10px;">
+        <p style="margin: 5px 0; font-weight: bold;">For SharePoint HTTP "Uri" field:</p>
+        <p style="margin: 5px 0; color: #28a745;">✅ CORRECT: Click in Uri field → Type directly:</p>
+        <code style="background-color: #e9f7ef; color: #155724; padding: 8px; display: block; margin: 8px 0;">_api/web/lists/GetByTitle('Meetings')/items(@{items('Apply_to_each_Item')?['Id']})/RoleAssignments</code>
+
+        <p style="margin: 15px 0 5px 0; color: #dc3545;">❌ WRONG: Click Expression tab → Enter expression</p>
+        <code style="background-color: #f8d7da; color: #721c24; padding: 8px; display: block; margin: 8px 0; text-decoration: line-through;">This will show "invalid expression" error!</code>
+    </div>
+</div>
+
+<div class="nav-toc">
+    <h3>📑 Table of Contents - 29 Actions</h3>
+    <strong>Foundation (1-2):</strong>
+    <a href="#action-trigger">Trigger: Manual Button</a>
+    <a href="#action-1">Action 1: Try_Scope</a>
+
+    <strong>Data Retrieval & Validation (2-4):</strong>
+    <a href="#action-2">Action 2: Get_Meeting_Record</a>
+    <a href="#action-3">Action 3: Condition_Check_FolderURL</a>
+    <a href="#action-4">Action 4: Create_Scan_Record</a>
+
+    <strong>URL Parsing (5-7):</strong>
+    <a href="#action-5">Action 5: Parse_Folder_URL</a>
+    <a href="#action-6">Action 6: Set_Site_URL</a>
+    <a href="#action-7">Action 7: Set_Folder_Path</a>
+
+    <strong>⭐ NEW - Configuration Variables (7a-7b):</strong>
+    <a href="#action-7a">Action 7a: Config_List_Title</a>
+    <a href="#action-7b">Action 7b: Config_Site_Path_Prefix</a>
+
+    <strong>Variables Initialization (8-11):</strong>
+    <a href="#action-8">Action 8: Initialize_Items_Array</a>
+    <a href="#action-9">Action 9: Initialize_Counter</a>
+    <a href="#action-10">Action 10: Initialize_Permissions_Counter</a>
+    <a href="#action-11">Action 11: Initialize_Broken_Counter</a>
+
+    <strong>SharePoint Data Retrieval (12-14):</strong>
+    <a href="#action-12">Action 12: Send_HTTP_to_SharePoint</a>
+    <a href="#action-13">Action 13: Parse_Items_Response</a>
+    <a href="#action-14">Action 14: Filter_Broken_Permissions</a>
+    <a href="#action-15">Action 15: Filter_By_Level</a>
+
+    <strong>Item Processing Loop (16-24):</strong>
+    <a href="#action-16">Action 16: Apply_to_each_Item</a>
+    <a href="#action-17">Action 17: Condition_Not_Null</a>
+    <a href="#action-18">Action 18: Increment_Broken_Counter</a>
+    <a href="#action-19">Action 19: Get_Item_Permissions</a>
+    <a href="#action-20">Action 20: Parse_Permissions</a>
+    <a href="#action-21">Action 21: Apply_to_each_Permission</a>
+    <a href="#action-22">Action 22: Select_Permission_Names</a>
+    <a href="#action-23">Action 23: Join_Permissions</a>
+    <a href="#action-24">Action 24: Create_Permission_Record</a>
+    <a href="#action-25">Action 25: Increment_Permissions_Counter</a>
+    <a href="#action-26">Action 26: Increment_Items_Counter</a>
+
+    <strong>Completion & Error Handling (27-29):</strong>
+    <a href="#action-27">Action 27: Update_Scan_Complete</a>
+    <a href="#action-28">Action 28: Terminate_No_FolderURL</a>
+    <a href="#action-29">Action 29: Update_Scan_Failed (Catch)</a>
+</div>
+
+<!-- ========================================================================== -->
+<!-- TRIGGER -->
+<!-- ========================================================================== -->
+
+<div class="action-block" id="action-trigger">
+    <div class="action-header">
+        <span class="action-number">T</span> TRIGGER: Manually trigger a flow
+    </div>
+
+    <div class="step-indicator">Step 0: Create the Flow</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Create a manual button trigger that accepts a Meeting ID as input.</p>
+
+    <h4>📝 Step-by-Step Instructions:</h4>
+    <ol>
+        <li>Go to <strong>https://make.powerautomate.com</strong></li>
+        <li>Click <strong>+ Create</strong> → <strong>Instant cloud flow</strong></li>
+        <li>Flow name: <code>ScanMeetingFolderPermissions</code></li>
+        <li>Choose trigger: <strong>Manually trigger a flow</strong></li>
+        <li>Click <strong>Create</strong></li>
+    </ol>
+
+    <h4>⚙️ Configure Input Parameter:</h4>
+    <p>In the trigger card that appears:</p>
+    <ol>
+        <li>Click <strong>+ Add an input</strong></li>
+        <li>Select <strong>Text</strong></li>
+        <li>Input name: <code>MeetingID</code></li>
+        <li>Description: <code>GUID of the meeting record to scan</code></li>
+    </ol>
+
+    <div class="expression-box">
+        <div class="expression-label">📋 Trigger Configuration (JSON Reference)</div>
+<code>{
+  "type": "Request",
+  "kind": "Button",
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "title": "MeetingID",
+          "type": "string",
+          "description": "GUID of the meeting record to scan"
+        }
+      },
+      "required": ["text"]
+    }
+  }
+}</code>
+    </div>
+
+    <div class="success-box">
+        <strong>✅ Verification:</strong> You should see a trigger card titled "Manually trigger a flow" with one text input field labeled "MeetingID".
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- ACTION 1: TRY SCOPE -->
+<!-- ========================================================================== -->
+
+<div class="action-block" id="action-1">
+    <div class="action-header">
+        <span class="action-number">1</span> ACTION 1: Try_Scope
+    </div>
+
+    <div class="step-indicator">Location: After Trigger</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Create a scope container for error handling. All main flow logic goes inside this scope. If any action fails, the Catch_Scope (Action 29) will execute.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong> under the trigger</li>
+        <li>Search for: <code>scope</code></li>
+        <li>Select <strong>Scope</strong> (from Control category)</li>
+        <li>Click the <strong>⋯</strong> menu (three dots) on the action card</li>
+        <li>Select <strong>Rename</strong></li>
+        <li>Enter new name: <code>Try_Scope</code></li>
+        <li>Click anywhere outside to save the rename</li>
+    </ol>
+
+    <div class="info-box">
+        <strong>💡 Best Practice:</strong> Using Try-Catch pattern with scopes allows you to gracefully handle errors across multiple actions with a single catch block, rather than adding error handling to each individual action.
+    </div>
+
+    <div class="success-box">
+        <strong>✅ Verification:</strong> You should see a scope card labeled "Try_Scope" with an empty "Add an action" button inside it.
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- ACTION 2: GET MEETING RECORD -->
+<!-- ========================================================================== -->
+
+<div class="action-block" id="action-2">
+    <div class="action-header">
+        <span class="action-number">2</span> ACTION 2: Get_Meeting_Record
+    </div>
+
+    <div class="step-indicator">Location: Inside Try_Scope</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Fetch the meeting record from Dataverse using the Meeting ID provided by the trigger. Retrieve specific fields needed for permission scanning.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li><strong>IMPORTANT:</strong> Click <strong>Add an action</strong> INSIDE the Try_Scope (not outside)</li>
+        <li>Search for: <code>get a row by id</code></li>
+        <li>Select <strong>Get a row by ID</strong> (Microsoft Dataverse connector)</li>
+        <li>If prompted, select or create a Dataverse connection</li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <table>
+        <tr>
+            <th style="width: 30%;">Field</th>
+            <th style="width: 40%;">Value</th>
+            <th style="width: 30%;">How to Set</th>
+        </tr>
+        <tr>
+            <td><strong>Table name</strong></td>
+            <td><code>Meetings</code></td>
+            <td>
+                <ol style="margin: 5px 0; padding-left: 20px; font-size: 0.9em;">
+                    <li>Click the dropdown</li>
+                    <li>Search or scroll to find "Meetings"</li>
+                    <li>Select it</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Row ID</strong></td>
+            <td>Dynamic content: <code>MeetingID</code></td>
+            <td>
+                <ol style="margin: 5px 0; padding-left: 20px; font-size: 0.9em;">
+                    <li>Click in the field</li>
+                    <li>Click the lightning bolt icon (⚡) to open dynamic content panel</li>
+                    <li>Select <strong>MeetingID</strong> from the "Manually trigger a flow" section</li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Select columns</strong><br><em>(Advanced option)</em></td>
+            <td><code>crad9_meetingid,crad9_newcolumn,crad9_folderurl,crad9_level</code></td>
+            <td>
+                <ol style="margin: 5px 0; padding-left: 20px; font-size: 0.9em;">
+                    <li>Click <strong>Show advanced options</strong> (at bottom of action)</li>
+                    <li>Find the "Select columns" field</li>
+                    <li>Copy and paste the value exactly as shown</li>
+                </ol>
+            </td>
+        </tr>
+    </table>
+
+    <div class="expression-box">
+        <div class="expression-label">📋 Actual Values (JSON Reference)</div>
+<code><strong>Entity Name:</strong> crad9_meetings
+<strong>Record ID Expression:</strong> @{triggerBody()?['text']}
+<strong>$select Parameter:</strong> crad9_meetingid,crad9_newcolumn,crad9_folderurl,crad9_level</code>
+    </div>
+
+    <h4>🔧 Rename the Action:</h4>
+    <ol>
+        <li>Click the <strong>⋯</strong> menu on the action card</li>
+        <li>Select <strong>Rename</strong></li>
+        <li>Enter: <code>Get_Meeting_Record</code></li>
+    </ol>
+
+    <div class="info-box">
+        <strong>💡 Why Select Specific Columns?</strong> Using $select reduces response size and improves performance. We only fetch the 4 fields we need instead of all 20+ fields in the meetings table.
+    </div>
+
+    <div class="success-box">
+        <strong>✅ Verification:</strong>
+        <ul>
+            <li>Action is renamed to "Get_Meeting_Record"</li>
+            <li>Table name shows "Meetings"</li>
+            <li>Row ID shows dynamic content tag with "MeetingID"</li>
+            <li>Advanced options expanded with select columns filled</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- ACTION 3: CONDITION CHECK FOLDER URL -->
+<!-- ========================================================================== -->
+
+<div class="action-block" id="action-3">
+    <div class="action-header">
+        <span class="action-number">3</span> ACTION 3: Condition_Check_FolderURL
+    </div>
+
+    <div class="step-indicator">Location: After Get_Meeting_Record</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Check if the meeting has a valid folder URL before attempting to scan. This prevents errors when scanning meetings that haven't had their SharePoint folders created yet.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong> after Get_Meeting_Record</li>
+        <li>Search for: <code>condition</code></li>
+        <li>Select <strong>Condition</strong> (Control)</li>
+    </ol>
+
+    <h4>⚙️ Configuration - Row 1:</h4>
+
+    <table>
+        <tr>
+            <th>Choose a value (Left)</th>
+            <th>Operator</th>
+            <th>Value (Right)</th>
+        </tr>
+        <tr>
+            <td>
+                <strong>Dynamic Content:</strong>
+                <ol style="margin: 5px 0; padding-left: 20px; font-size: 0.9em;">
+                    <li>Click in the "Choose a value" field</li>
+                    <li>Click lightning bolt icon</li>
+                    <li>Find <strong>crad9_folderurl</strong> from Get_Meeting_Record</li>
+                    <li>Click to insert it</li>
+                </ol>
+            </td>
+            <td>
+                <code>is not equal to</code>
+                <p style="font-size: 0.9em; margin: 5px 0;">Select from dropdown</p>
+            </td>
+            <td>
+                <strong>Expression:</strong>
+                <ol style="margin: 5px 0; padding-left: 20px; font-size: 0.9em;">
+                    <li>Click in the "Value" field</li>
+                    <li>Switch to <strong>Expression</strong> tab</li>
+                    <li>Type: <code>null</code></li>
+                    <li>Click OK</li>
+                </ol>
+            </td>
+        </tr>
+    </table>
+
+    <h4>⚙️ Configuration - Row 2 (AND):</h4>
+    <ol>
+        <li>Click <strong>+ Add</strong> button</li>
+        <li>Select <strong>Add row</strong> (keeps it as AND logic)</li>
+    </ol>
+
+    <table>
+        <tr>
+            <th>Choose a value (Left)</th>
+            <th>Operator</th>
+            <th>Value (Right)</th>
+        </tr>
+        <tr>
+            <td>
+                <strong>Dynamic Content:</strong>
+                <p style="font-size: 0.9em; margin: 5px 0;">Same as Row 1: <code>crad9_folderurl</code></p>
+            </td>
+            <td>
+                <code>is not equal to</code>
+            </td>
+            <td>
+                <strong>Expression:</strong>
+                <ol style="margin: 5px 0; padding-left: 20px; font-size: 0.9em;">
+                    <li>Click in the "Value" field</li>
+                    <li>Switch to <strong>Expression</strong> tab</li>
+                    <li>Type: <code>''</code> (two single quotes, no space)</li>
+                    <li>Click OK</li>
+                </ol>
+            </td>
+        </tr>
+    </table>
+
+    <div class="expression-box">
+        <div class="expression-label">📋 Condition Expression (JSON Reference)</div>
+<code>"and": [
+  {
+    "not": {
+      "equals": [
+        "@outputs('Get_Meeting_Record')?['body/crad9_folderurl']",
+        "@null"
+      ]
+    }
+  },
+  {
+    "not": {
+      "equals": [
+        "@outputs('Get_Meeting_Record')?['body/crad9_folderurl']",
+        ""
+      ]
+    }
+  }
+]</code>
+    </div>
+
+    <h4>🔧 Rename the Action:</h4>
+    <p>Rename to: <code>Condition_Check_FolderURL</code></p>
+
+    <div class="info-box">
+        <strong>💡 Why Two Conditions?</strong> In Power Automate/Dataverse, a field can be <code>null</code> (not set) or <code>""</code> (empty string). We check both to ensure the folder URL actually has a value.
+    </div>
+
+    <div class="warning-box">
+        <strong>⚠️ IMPORTANT:</strong> All remaining actions (4-27) go in the <strong>"If yes"</strong> branch of this condition. Action 28 goes in the "If no" branch.
+    </div>
+
+    <div class="success-box">
+        <strong>✅ Verification:</strong>
+        <ul>
+            <li>Condition renamed to "Condition_Check_FolderURL"</li>
+            <li>Two rows showing, connected by "And"</li>
+            <li>Both rows check the same field (crad9_folderurl)</li>
+            <li>Row 1 checks ≠ null, Row 2 checks ≠ empty string</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- ACTION 4: CREATE SCAN RECORD -->
+<!-- ========================================================================== -->
+
+<div class="action-block" id="action-4">
+    <div class="action-header">
+        <span class="action-number">4</span> ACTION 4: Create_Scan_Record
+    </div>
+
+    <div class="step-indicator">Location: Inside "If yes" branch of Condition</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Create a tracking record in the Scans table to log this permission scan operation. This record will be updated with results when the scan completes (or fails).</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li><strong>CRITICAL:</strong> Click <strong>Add an action</strong> in the <strong>"If yes"</strong> box (green checkmark side)</li>
+        <li>Search for: <code>add a new row</code></li>
+        <li>Select <strong>Add a new row</strong> (Microsoft Dataverse)</li>
+        <li>If you see "Add a new row to selected environment" with PREMIUM label, that's OK to use</li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Environment</span> (if using premium version)
+        <p style="margin: 5px 0 0 0;">Select: <code>(Current)</code> or your environment name</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Table name</span>
+        <p style="margin: 5px 0 0 0;">Select: <code>Scans</code> from dropdown</p>
+    </div>
+
+    <h4>📋 Field-by-Field Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">crad9_name</span> (Scan Name)
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>concat('Scan - ', outputs('Get_Meeting_Record')?['body/crad9_newcolumn'], ' - ', utcNow())</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 5px 0;">
+            <strong>How to enter:</strong><br>
+            1. Click in crad9_name field<br>
+            2. Switch to <strong>Expression</strong> tab (at bottom of panel)<br>
+            3. Copy and paste the expression above<br>
+            4. Click OK
+        </p>
+        <p style="font-size: 0.9em; color: #0078d4; margin: 5px 0;">
+            <strong>Example result:</strong> "Scan - Board Meeting Q1/2026 - 2026-02-23T14:30:00Z"
+        </p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">crad9_Meeting</span> (Lookup to Meeting)
+        <p style="margin: 8px 0 5px 0;"><strong>Use Dynamic Content:</strong></p>
+        <p style="font-size: 0.9em; margin: 5px 0;">
+            1. Click in field<br>
+            2. Find <strong>crad9_meetingid</strong> from Get_Meeting_Record<br>
+            3. Click to insert
+        </p>
+        <div class="info-box" style="margin: 8px 0;">
+            <strong>💡 Note:</strong> This is a lookup field. Power Automate will automatically handle the @odata.bind syntax when you select the GUID field.
+        </div>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">crad9_folderurl</span> (Folder URL)
+        <p style="margin: 8px 0 5px 0;"><strong>Use Dynamic Content:</strong></p>
+        <p style="font-size: 0.9em; margin: 5px 0;">
+            Insert: <strong>crad9_folderurl</strong> from Get_Meeting_Record
+        </p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">crad9_level</span> (Depth Level Setting)
+        <p style="margin: 8px 0 5px 0;"><strong>Use Dynamic Content:</strong></p>
+        <p style="font-size: 0.9em; margin: 5px 0;">
+            Insert: <strong>crad9_level</strong> from Get_Meeting_Record
+        </p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">crad9_scanstarttime</span> (Start Timestamp)
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>utcNow()</code>
+        </div>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">crad9_status</span> (Status - In Progress)
+        <p style="margin: 8px 0 5px 0;"><strong>Type Number:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>192350000</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 5px 0;">
+            This is the option set value for "In Progress" status
+        </p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">crad9_itemsscanned</span> (Counter - Items)
+        <p style="margin: 8px 0 5px 0;"><strong>Type Number:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>0</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 5px 0;">Initialize to 0, will increment as we process items</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">crad9_brokenpermissionsfound</span> (Counter - Broken)
+        <p style="margin: 8px 0 5px 0;"><strong>Type Number:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>0</code>
+        </div>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">crad9_totalpermissionsrecorded</span> (Counter - Permissions)
+        <p style="margin: 8px 0 5px 0;"><strong>Type Number:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>0</code>
+        </div>
+    </div>
+
+    <h4>🔧 Rename the Action:</h4>
+    <p>Rename to: <code>Create_Scan_Record</code></p>
+
+    <div class="success-box">
+        <strong>✅ Verification:</strong>
+        <ul>
+            <li>All 9 fields filled in</li>
+            <li>crad9_name shows expression with concat()</li>
+            <li>Three counter fields all set to 0</li>
+            <li>crad9_status set to 192350000</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Continue with remaining actions... Due to length, I'll create remaining actions in similar detail -->
+
+<!-- ========================================================================== -->
+<!-- ACTIONS 5-7: URL PARSING -->
+<!-- ========================================================================== -->
+
+<div class="action-block" id="action-5">
+    <div class="action-header">
+        <span class="action-number">5</span> ACTION 5: Parse_Folder_URL
+    </div>
+
+    <div class="step-indicator">Location: After Create_Scan_Record</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Split the SharePoint folder URL into an array by '/' character. This array will be used to extract the site URL and folder path.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>compose</code></li>
+        <li>Select <strong>Compose</strong> (Data Operations)</li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Inputs</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>split(outputs('Get_Meeting_Record')?['body/crad9_folderurl'], '/')</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 8px 0;">
+            <strong>What this does:</strong> Splits the URL by '/' into an array
+        </p>
+        <p style="font-size: 0.9em; color: #0078d4; margin: 5px 0;">
+            <strong>Example Input:</strong><br>
+            "https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Q1 2026"
+        </p>
+        <p style="font-size: 0.9em; color: #0078d4; margin: 5px 0;">
+            <strong>Example Output:</strong><br>
+            ["https:", "", "ABCTest179.sharepoint.com", "sites", "Permission-Scanner-Test", "Meetings", "Q1 2026"]
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Parse_Folder_URL</code></p>
+</div>
+
+<div class="action-block" id="action-6">
+    <div class="action-header">
+        <span class="action-number">6</span> ACTION 6: Set_Site_URL
+    </div>
+
+    <div class="step-indicator">Location: After Parse_Folder_URL</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Reconstruct the SharePoint site URL from the parsed array elements. Combines elements [0], [2], and [4] with hardcoded "//" and "/sites/" separators.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>compose</code></li>
+        <li>Select <strong>Compose</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Inputs</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@{outputs('Parse_Folder_URL')[0]}//@{outputs('Parse_Folder_URL')[2]}/sites/@{outputs('Parse_Folder_URL')[4]}</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 8px 0;">
+            <strong>What this does:</strong><br>
+            • [0] = "https:"<br>
+            • [2] = "ABCTest179.sharepoint.com"<br>
+            • [4] = "Permission-Scanner-Test"<br>
+            • Combines with hardcoded "//" and "/sites/"
+        </p>
+        <p style="font-size: 0.9em; color: #0078d4; margin: 5px 0;">
+            <strong>Example Output:</strong><br>
+            "https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test"
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Set_Site_URL</code></p>
+</div>
+
+<div class="action-block" id="action-7">
+    <div class="action-header">
+        <span class="action-number">7</span> ACTION 7: Set_Folder_Path
+    </div>
+
+    <div class="step-indicator">Location: After Set_Site_URL</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Extract the folder path by skipping the first 5 elements (site URL parts) and joining the remaining elements with '/'.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>compose</code></li>
+        <li>Select <strong>Compose</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Inputs</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>join(skip(outputs('Parse_Folder_URL'), 5), '/')</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 8px 0;">
+            <strong>What this does:</strong><br>
+            • skip(..., 5) removes first 5 elements (site URL)<br>
+            • join(..., '/') combines remaining elements with '/' separator
+        </p>
+        <p style="font-size: 0.9em; color: #0078d4; margin: 5px 0;">
+            <strong>Example:</strong><br>
+            Array after skip: ["Meetings", "Q1 2026"]<br>
+            After join: "Meetings/Q1 2026"
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Set_Folder_Path</code></p>
+
+    <div class="warning-box" style="margin-top: 20px;">
+        <strong>⚠️ IMPORTANT: URL Decoding Issue</strong>
+        <p>If your meeting folder URLs were saved with URL encoding (e.g., <code>%20</code> for spaces, <code>%5B</code> for brackets), you need to decode them before using in SharePoint filters.</p>
+
+        <p><strong>Symptom:</strong> Your SharePoint HTTP request returns 0 items even though folders exist.</p>
+
+        <p><strong>Why:</strong> SharePoint's <code>FileRef</code> field stores decoded paths like <code>Meetings/Budget Meeting- [Urgent]</code>, but your URL might be encoded like <code>Meetings/Budget%20Meeting-%20%5BUrgent%5D</code>.</p>
+
+        <p><strong>Fix:</strong> Add an additional Compose action after Set_Folder_Path:</p>
+
+        <ol style="margin: 10px 0; line-height: 1.8;">
+            <li>After <strong>Set_Folder_Path</strong>, add a new <strong>Compose</strong> action</li>
+            <li>Name it: <code>Decode_Folder_Path</code></li>
+            <li>Use Expression: <code>uriComponentToString(outputs('Set_Folder_Path'))</code></li>
+            <li>In Action 12 (Send_HTTP_to_SharePoint), use <code>@{outputs('Decode_Folder_Path')}</code> instead of <code>@{outputs('Set_Folder_Path')}</code></li>
+        </ol>
+
+        <p style="margin-top: 10px;"><strong>Updated Uri for Action 12:</strong></p>
+        <div class="expression-box" style="font-size: 10px; margin: 5px 0;">
+<code>_api/web/lists/GetByTitle('Meetings')/items?$select=Id,FileRef,FileLeafRef,FSObjType,Modified,HasUniqueRoleAssignments&$filter=startswith(FileRef,'@{outputs('Decode_Folder_Path')}')&$top=500</code>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- NEW CONFIGURATION ACTIONS (7a, 7b) -->
+<!-- ========================================================================== -->
+
+<div class="action-block" id="action-7a">
+    <div class="action-header">
+        <span class="action-number">7a</span> ACTION 7a: Config_List_Title ⭐ NEW
+    </div>
+
+    <div class="step-indicator">Location: After Set_Folder_Path</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Extract the SharePoint list title <strong>dynamically</strong> from the parsed folder URL. This automatically adapts to any library name (Meetings, Documents, Shared Documents, etc.) without requiring manual configuration.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>compose</code></li>
+        <li>Select <strong>Compose</strong> (Data Operations)</li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Inputs</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>outputs('Parse_Folder_URL')[5]</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 8px 0;">
+            <strong>What this does:</strong> Extracts the library name from the 6th element (index 5) of the parsed URL array.
+        </p>
+        <p style="font-size: 0.9em; color: #0078d4; margin: 5px 0;">
+            <strong>Example:</strong><br>
+            URL: <code>https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Budget Meeting</code><br>
+            Array[5]: <code>"Meetings"</code><br>
+            <br>
+            Different library automatically works:<br>
+            URL: <code>https://...sharepoint.com/sites/MySite/Documents/HR Files</code><br>
+            Array[5]: <code>"Documents"</code>
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Config_List_Title</code></p>
+
+    <div class="info-box">
+        <strong>💡 Why Dynamic Extraction?</strong>
+        <p>Instead of hardcoding "Meetings", we extract the library name from the folder URL. Benefits:</p>
+        <ul>
+            <li>✅ <strong>Zero Configuration:</strong> Works with ANY library name automatically</li>
+            <li>✅ <strong>Multi-Library Support:</strong> Same flow can scan "Documents", "Meetings", "Shared Documents", etc.</li>
+            <li>✅ <strong>Site-Agnostic:</strong> Automatically adapts to different SharePoint sites</li>
+            <li>✅ <strong>Future-Proof:</strong> No manual updates needed when library names change</li>
+        </ul>
+    </div>
+
+    <div class="success-box">
+        <strong>✅ Verification:</strong> When you test the flow, this should show your library name (e.g., "Meetings")
+    </div>
+</div>
+
+<div class="action-block" id="action-7b">
+    <div class="action-header">
+        <span class="action-number">7b</span> ACTION 7b: Config_Site_Path_Prefix ⭐ NEW
+    </div>
+
+    <div class="step-indicator">Location: After Config_List_Title</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Build the SharePoint site path prefix <strong>dynamically</strong> from the parsed folder URL. This is CRITICAL for the SharePoint filter to work correctly because SharePoint's FileRef field stores server-relative paths starting with <code>/sites/...</code></p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>compose</code></li>
+        <li>Select <strong>Compose</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Inputs</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>concat('/', outputs('Parse_Folder_URL')[3], '/', outputs('Parse_Folder_URL')[4])</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 8px 0;">
+            <strong>What this does:</strong> Combines <code>/</code> + element[3] + <code>/</code> + element[4] to build the site path.
+        </p>
+        <p style="font-size: 0.9em; color: #0078d4; margin: 8px 0;">
+            <strong>Example:</strong><br>
+            URL: <code>https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Budget Meeting</code><br>
+            Array[3]: <code>"sites"</code><br>
+            Array[4]: <code>"Permission-Scanner-Test"</code><br>
+            Result: <code>"/sites/Permission-Scanner-Test"</code><br>
+            <br>
+            Different site automatically works:<br>
+            URL: <code>https://...sharepoint.com/sites/MyOtherSite/Documents/HR Files</code><br>
+            Result: <code>"/sites/MyOtherSite"</code>
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Config_Site_Path_Prefix</code></p>
+
+    <div class="error-box">
+        <strong>🚨 CRITICAL: Why This is Required</strong>
+        <p>SharePoint stores file paths in the <code>FileRef</code> field as server-relative paths:</p>
+        <div class="code-block" style="font-size: 11px; margin: 10px 0;">
+Example FileRef value:
+/sites/Permission-Scanner-Test/Meetings/Budget Meeting- [Urgent]/document.docx
+
+NOT just:
+Meetings/Budget Meeting- [Urgent]/document.docx
+        </div>
+        <p>Your filter <strong>MUST</strong> include the <code>/sites/...</code> prefix or you'll get 0 results even when files exist!</p>
+        <p style="margin-top: 10px;"><strong>Dynamic extraction ensures:</strong> The prefix automatically matches whatever site the folder URL points to.</p>
+    </div>
+
+    <div class="success-box">
+        <strong>✅ Verification:</strong> When you test the flow, this should show your site path (e.g., "/sites/Permission-Scanner-Test")
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- SECTION 2: VARIABLE INITIALIZATION (ACTIONS 8-11) -->
+<!-- ========================================================================== -->
+
+<div class="action-block" id="action-8">
+    <div class="action-header">
+        <span class="action-number">8</span> ACTION 8: Initialize_Items_Array
+    </div>
+
+    <div class="step-indicator">Location: After Set_Folder_Path</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Create an array variable to store all SharePoint items that will be scanned. This is used later if you need to process items in batches.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>initialize variable</code></li>
+        <li>Select <strong>Initialize variable</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Name</span>
+        <p style="margin: 8px 0;"><code>varAllItems</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Type</span>
+        <p style="margin: 8px 0;">Select: <code>Array</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Value</span>
+        <p style="margin: 8px 0;">Leave empty (or click <strong>Expression</strong> tab and enter: <code>[]</code>)</p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Initialize_Items_Array</code></p>
+
+    <div class="success-box">
+        <strong>✅ Success Check:</strong> Variable should show as array type with empty value []
+    </div>
+</div>
+
+<!-- ACTION 9 -->
+<div class="action-block" id="action-9">
+    <div class="action-header">
+        <span class="action-number">9</span> ACTION 9: Initialize_Counter (Items Scanned)
+    </div>
+
+    <div class="step-indicator">Location: After Initialize_Items_Array</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Track the total number of items scanned during this run. This counter is displayed in the final scan record.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>initialize variable</code></li>
+        <li>Select <strong>Initialize variable</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Name</span>
+        <p style="margin: 8px 0;"><code>varItemsScanned</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Type</span>
+        <p style="margin: 8px 0;">Select: <code>Integer</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Value</span>
+        <p style="margin: 8px 0;"><code>0</code></p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Initialize_Counter</code></p>
+</div>
+
+<!-- ACTION 10 -->
+<div class="action-block" id="action-10">
+    <div class="action-header">
+        <span class="action-number">10</span> ACTION 10: Initialize_Permissions_Counter
+    </div>
+
+    <div class="step-indicator">Location: After Initialize_Counter</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Track the total number of permission records created. Each user/group permission on each item increments this counter.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>initialize variable</code></li>
+        <li>Select <strong>Initialize variable</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Name</span>
+        <p style="margin: 8px 0;"><code>varPermissionsRecorded</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Type</span>
+        <p style="margin: 8px 0;">Select: <code>Integer</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Value</span>
+        <p style="margin: 8px 0;"><code>0</code></p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Initialize_Permissions_Counter</code></p>
+</div>
+
+<!-- ACTION 11 -->
+<div class="action-block" id="action-11">
+    <div class="action-header">
+        <span class="action-number">11</span> ACTION 11: Initialize_Broken_Counter
+    </div>
+
+    <div class="step-indicator">Location: After Initialize_Permissions_Counter</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Track how many items have broken permission inheritance (unique permissions). This helps identify security risks.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>initialize variable</code></li>
+        <li>Select <strong>Initialize variable</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Name</span>
+        <p style="margin: 8px 0;"><code>varBrokenPermissions</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Type</span>
+        <p style="margin: 8px 0;">Select: <code>Integer</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Value</span>
+        <p style="margin: 8px 0;"><code>0</code></p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Initialize_Broken_Counter</code></p>
+
+    <div class="info-box">
+        <strong>📊 Variables Summary:</strong>
+        <ul style="margin: 10px 0;">
+            <li><code>varAllItems</code> - Array of all fetched items</li>
+            <li><code>varItemsScanned</code> - Count of items processed</li>
+            <li><code>varPermissionsRecorded</code> - Count of permission records created</li>
+            <li><code>varBrokenPermissions</code> - Count of items with unique permissions</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- SECTION 3: SHAREPOINT DATA RETRIEVAL (ACTIONS 12-15) -->
+<!-- ========================================================================== -->
+
+<!-- ========================================================================== -->
+<!-- ACTION 12: HTTP REQUEST TO SHAREPOINT -->
+<!-- ========================================================================== -->
+
+<div class="action-block" id="action-12">
+    <div class="action-header">
+        <span class="action-number">12</span> ACTION 12: Send_HTTP_to_SharePoint
+    </div>
+
+    <div class="step-indicator">Location: After Initialize_Broken_Counter (Action 11)</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Query SharePoint REST API to fetch all items in the meeting folder. This retrieves metadata about files and folders, including permission status.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>send an http request to sharepoint</code></li>
+        <li>Select <strong>Send an HTTP request to SharePoint</strong> (SharePoint connector)</li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Site Address</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Dynamic Content:</strong></p>
+        <p style="font-size: 0.9em; margin: 5px 0;">
+            Insert output from: <strong>Set_Site_URL</strong> (Action 6)
+        </p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Method</span>
+        <p style="margin: 8px 0 5px 0;">Select: <code>GET</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Uri</span>
+        <p style="margin: 8px 0 5px 0;"><strong>⭐ UPDATED - IMPORTANT: Type directly in the Uri field (NOT in Expression tab):</strong></p>
+        <div class="expression-box" style="margin: 5px 0; font-size: 11px;">
+<code>_api/web/lists/GetByTitle('@{outputs('Config_List_Title')}')/items?$select=Id,FileRef,FileLeafRef,FSObjType,Modified,HasUniqueRoleAssignments&$filter=startswith(FileRef,'@{outputs('Config_Site_Path_Prefix')}/@{outputs('Set_Folder_Path')}')&$top=500</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 8px 0;">
+            <strong>How to enter:</strong><br>
+            1. Click in the Uri field<br>
+            2. Type (or paste) the entire string above directly<br>
+            3. The <code>@{...}</code> parts will automatically become dynamic content (purple chips)<br>
+            <br>
+            <strong>What Changed (vs OLD version):</strong><br>
+            • <code>'Meetings'</code> → <code>'@{outputs('Config_List_Title')}'</code> (uses Action 7a)<br>
+            • <code>'/sites/Permission-Scanner-Test/</code> → <code>'@{outputs('Config_Site_Path_Prefix')}/</code> (uses Action 7b)<br>
+            <br>
+            <strong>Breakdown:</strong><br>
+            • <code>GetByTitle('@{outputs('Config_List_Title')}')</code> - Target library (from Config)<br>
+            • <code>$select</code> - Fields to retrieve<br>
+            • <code>$filter</code> - Only items in this folder<br>
+            • <code>startswith(FileRef,'@{outputs('Config_Site_Path_Prefix')}/...')</code> - CRITICAL: Uses site path from Config!<br>
+            • <code>$top=500</code> - Max 500 items
+        </p>
+        <div class="info-box" style="margin-top: 10px;">
+            <strong>💡 OLD VERSION (hardcoded - not recommended):</strong>
+            <div class="code-block" style="font-size: 10px; margin: 5px 0;">
+_api/web/lists/GetByTitle('Meetings')/items?$select=Id,FileRef,FileLeafRef,FSObjType,Modified,HasUniqueRoleAssignments&$filter=startswith(FileRef,'/sites/Permission-Scanner-Test/@{outputs('Set_Folder_Path')}')&$top=500
+            </div>
+        </div>
+    </div>
+
+    <div class="error-box" style="margin-top: 15px;">
+        <strong>🚨 CRITICAL FIX: FileRef Path Format</strong>
+        <p>SharePoint stores <code>FileRef</code> as <strong>server-relative paths</strong> starting with <code>/sites/...</code></p>
+        <p><strong>Example:</strong> <code>/sites/Permission-Scanner-Test/Meetings/Budget Meeting- [Urgent]/file.docx</code></p>
+        <p>Your filter <strong>MUST</strong> include the site path prefix: <code>/sites/Permission-Scanner-Test/</code></p>
+        <p style="margin-top: 10px;"><strong>Common mistake:</strong></p>
+        <ul>
+            <li>❌ <code>startswith(FileRef,'Meetings/...')</code> - Will return 0 items</li>
+            <li>✅ <code>startswith(FileRef,'/sites/Permission-Scanner-Test/Meetings/...')</code> - Correct!</li>
+        </ul>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Send_HTTP_to_SharePoint</code></p>
+
+    <div class="success-box">
+        <strong>✅ Success Check:</strong> When you test this action manually, you should see a JSON response with SharePoint items
+    </div>
+</div>
+
+<!-- ACTION 13 -->
+<div class="action-block" id="action-13">
+    <div class="action-header">
+        <span class="action-number">13</span> ACTION 13: Parse_Items_Response
+    </div>
+
+    <div class="step-indicator">Location: After Send_HTTP_to_SharePoint</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Parse the SharePoint HTTP response into a structured JSON object so we can access individual item properties.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>parse json</code></li>
+        <li>Select <strong>Parse JSON</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Content</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Dynamic Content:</strong></p>
+        <p style="font-size: 0.9em; margin: 5px 0;">
+            Insert: <strong>Body</strong> (from Send_HTTP_to_SharePoint)
+        </p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@body('Send_HTTP_to_SharePoint')</code>
+        </div>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Schema</span>
+        <p style="margin: 8px 0 5px 0;">Click <strong>"Use sample payload to generate schema"</strong> and paste:</p>
+        <div class="code-block" style="font-size: 11px; max-height: 300px; overflow-y: auto;">
+{
+  "d": {
+    "results": [
+      {
+        "Id": 1,
+        "FileRef": "Meetings/Q1 2026/Budget.docx",
+        "FileLeafRef": "Budget.docx",
+        "FSObjType": 0,
+        "HasUniqueRoleAssignments": true
+      }
+    ]
+  }
+}
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 8px 0;">
+            <strong>Field Explanations:</strong><br>
+            • <code>FSObjType</code>: 0 = File, 1 = Folder<br>
+            • <code>HasUniqueRoleAssignments</code>: true = Broken inheritance
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Parse_Items_Response</code></p>
+</div>
+
+<!-- ACTION 14 -->
+<div class="action-block" id="action-14">
+    <div class="action-header">
+        <span class="action-number">14</span> ACTION 14: Filter_Broken_Permissions
+    </div>
+
+    <div class="step-indicator">Location: After Parse_Items_Response</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Filter the SharePoint items to only include those with broken permission inheritance (unique permissions). This is the core security scan - we only care about items that don't inherit from parent.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>filter array</code></li>
+        <li>Select <strong>Filter array</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">From</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@body('Parse_Items_Response')?['d']?['results']</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 5px 0;">
+            Navigates to the results array inside the OData response
+        </p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Condition</span>
+        <p style="margin: 8px 0;">Switch to <strong>Edit in advanced mode</strong> and enter:</p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@equals(item()?['HasUniqueRoleAssignments'], true)</code>
+        </div>
+        <p style="font-size: 0.9em; color: #0078d4; margin: 8px 0;">
+            <strong>What this does:</strong> Only keeps items where HasUniqueRoleAssignments = true (broken inheritance)
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Filter_Broken_Permissions</code></p>
+
+    <div class="info-box">
+        <strong>🔍 Why Filter Broken Permissions?</strong>
+        <p>Items that inherit permissions from parent folders are less of a security concern. We focus on items with <em>unique</em> permissions because they may have been explicitly shared with unauthorized users.</p>
+    </div>
+</div>
+
+<!-- ACTION 15 -->
+<div class="action-block" id="action-15">
+    <div class="action-header">
+        <span class="action-number">15</span> ACTION 15: Filter_By_Level (Depth Check)
+    </div>
+
+    <div class="step-indicator">Location: After Filter_Broken_Permissions</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Filter items by folder depth level. The meeting record has a "Level" field that controls how deep the scan should go. This prevents scanning unnecessary subfolders.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>select</code></li>
+        <li>Select <strong>Select</strong> (Data Operations)</li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">From</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@body('Filter_Broken_Permissions')</code>
+        </div>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Map</span>
+        <p style="margin: 8px 0;">Switch to <strong>Edit in advanced mode</strong> and enter this complex expression:</p>
+        <div class="expression-box" style="margin: 5px 0; font-size: 10px;">
+<code>@if(greaterOrEquals(sub(length(split(item()?['FileRef'], '/')), length(split(outputs('Set_Folder_Path'), '/'))), outputs('Get_Meeting_Record')?['body/crad9_level']), item(), null)</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 12px 0;">
+            <strong>Expression Breakdown:</strong>
+        </p>
+        <div class="code-block" style="font-size: 11px;">
+Step 1: split(item()?['FileRef'], '/')
+        → Splits item path into array
+        Example: "Meetings/Q1/Budget.docx" → ["Meetings", "Q1", "Budget.docx"]
+
+Step 2: length(...)
+        → Counts elements (depth = 3)
+
+Step 3: split(outputs('Set_Folder_Path'), '/')
+        → Splits base folder path
+        Example: "Meetings/Q1" → ["Meetings", "Q1"]
+
+Step 4: length(...)
+        → Counts elements (base depth = 2)
+
+Step 5: sub(itemDepth, baseFolderDepth)
+        → Calculates relative depth (3 - 2 = 1)
+
+Step 6: outputs('Get_Meeting_Record')?['body/crad9_level']
+        → Gets configured scan depth from meeting record
+        Example: 2 (scan 2 levels deep)
+
+Step 7: greaterOrEquals(relativeDepth, configuredLevel)
+        → Checks if item is within allowed depth
+        Example: 1 >= 2 → TRUE (include this item)
+
+Step 8: if(condition, item(), null)
+        → Returns item if within depth, null if too deep
+        </div>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Filter_By_Level</code></p>
+
+    <div class="warning-box">
+        <strong>⚠️ Important:</strong> This filter creates an array that may contain <code>null</code> values for items that are too deep. We'll filter these out in the next step.
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- SECTION 4: NESTED LOOPS - PROCESS ITEMS AND PERMISSIONS (ACTIONS 16-26) -->
+<!-- ========================================================================== -->
+
+<!-- ACTION 16 -->
+<div class="action-block" id="action-16">
+    <div class="action-header">
+        <span class="action-number">16</span> ACTION 16: Apply_to_each_Item (Outer Loop)
+    </div>
+
+    <div class="step-indicator">Location: After Filter_By_Level</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Loop through each filtered SharePoint item (files/folders with broken permissions within allowed depth). This is the <strong>outer loop</strong> - for each item, we'll get its permissions in the inner loop.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong></li>
+        <li>Search for: <code>apply to each</code></li>
+        <li>Select <strong>Apply to each</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Select an output from previous steps</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@body('Filter_By_Level')</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 5px 0;">
+            This is the array of items that passed both filters (broken permissions + depth check)
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Apply_to_each_Item</code></p>
+
+    <div class="info-box">
+        <strong>🔄 Loop Structure:</strong>
+        <p>The next 10 actions (17-26) will be INSIDE this loop. Don't add any more top-level actions - all subsequent actions until Action 27 go inside this foreach.</p>
+    </div>
+</div>
+
+<!-- ACTION 17 -->
+<div class="action-block" id="action-17">
+    <div class="action-header">
+        <span class="action-number">17</span> ACTION 17: Condition_Not_Null
+    </div>
+
+    <div class="step-indicator">Location: INSIDE Apply_to_each_Item loop</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Check if the current item is NOT null. Remember Filter_By_Level (Action 15) returned null for items that were too deep, so we skip processing those.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>Add an action</strong> INSIDE the Apply_to_each_Item loop</li>
+        <li>Search for: <code>condition</code></li>
+        <li>Select <strong>Condition</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Choose a value</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@items('Apply_to_each_Item')</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 5px 0;">
+            This is the current item in the loop
+        </p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Operator</span>
+        <p style="margin: 8px 0;">Select: <code>is not equal to</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Choose a value (right side)</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@null</code>
+        </div>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Condition_Not_Null</code></p>
+
+    <div class="info-box">
+        <strong>📍 Important:</strong> All remaining actions (18-26) go in the <strong>TRUE branch</strong> of this condition (the "If yes" side). Don't add anything to the "If no" branch.
+    </div>
+</div>
+
+<!-- ACTION 18 -->
+<div class="action-block" id="action-18">
+    <div class="action-header">
+        <span class="action-number">18</span> ACTION 18: Increment_Broken_Counter
+    </div>
+
+    <div class="step-indicator">Location: INSIDE "If yes" branch of Condition_Not_Null</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Count this item as having broken permissions. This counter will be saved to the scan record at the end.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>Add an action</strong> in the <strong>"If yes"</strong> branch</li>
+        <li>Search for: <code>increment variable</code></li>
+        <li>Select <strong>Increment variable</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Name</span>
+        <p style="margin: 8px 0;">Select: <code>varBrokenPermissions</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Value</span>
+        <p style="margin: 8px 0;"><code>1</code></p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Increment_Broken_Counter</code></p>
+</div>
+
+<!-- ACTION 19 -->
+<div class="action-block" id="action-19">
+    <div class="action-header">
+        <span class="action-number">19</span> ACTION 19: Get_Item_Permissions
+    </div>
+
+    <div class="step-indicator">Location: After Increment_Broken_Counter</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Query SharePoint REST API to get the specific permissions (role assignments) for this item. This retrieves WHO has access and WHAT permission level they have.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>Add an action</strong></li>
+        <li>Search for: <code>send an http request to sharepoint</code></li>
+        <li>Select <strong>Send an HTTP request to SharePoint</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Site Address</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Dynamic Content:</strong></p>
+        <p style="font-size: 0.9em; margin: 5px 0;">
+            Insert output from: <strong>Set_Site_URL</strong>
+        </p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Method</span>
+        <p style="margin: 8px 0;">Select: <code>GET</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Uri</span>
+        <p style="margin: 8px 0 5px 0;"><strong>⭐ UPDATED - IMPORTANT: Type directly in the Uri field (NOT in Expression tab):</strong></p>
+        <div class="expression-box" style="margin: 5px 0; font-size: 10px;">
+<code>_api/web/lists/GetByTitle('@{outputs('Config_List_Title')}')/items(@{items('Apply_to_each_Item')?['Id']})/RoleAssignments?$expand=RoleDefinitionBindings,Member</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 8px 0;">
+            <strong>How to enter:</strong><br>
+            1. Click in the Uri field<br>
+            2. Type (or paste) the entire string above directly<br>
+            3. The <code>@{...}</code> parts will automatically become dynamic content (purple chips)<br>
+            <br>
+            <strong>What Changed (vs OLD version):</strong><br>
+            • <code>'Meetings'</code> → <code>'@{outputs('Config_List_Title')}'</code> (uses Action 7a)<br>
+            <br>
+            <strong>Breakdown:</strong><br>
+            • <code>GetByTitle('@{outputs('Config_List_Title')}')</code> - Target library (from Config)<br>
+            • <code>items(@{...?['Id']})</code> - Get specific item by ID<br>
+            • <code>RoleAssignments</code> - Get permission assignments<br>
+            • <code>$expand=RoleDefinitionBindings,Member</code> - Include permission names and user/group details
+        </p>
+        <div class="info-box" style="margin-top: 10px;">
+            <strong>💡 OLD VERSION (hardcoded - not recommended):</strong>
+            <div class="code-block" style="font-size: 10px; margin: 5px 0;">
+_api/web/lists/GetByTitle('Meetings')/items(@{items('Apply_to_each_Item')?['Id']})/RoleAssignments?$expand=RoleDefinitionBindings,Member
+            </div>
+        </div>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Get_Item_Permissions</code></p>
+</div>
+
+<!-- ACTION 20 -->
+<div class="action-block" id="action-20">
+    <div class="action-header">
+        <span class="action-number">20</span> ACTION 20: Parse_Permissions
+    </div>
+
+    <div class="step-indicator">Location: After Get_Item_Permissions</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Parse the permissions HTTP response into structured JSON so we can loop through each user/group assignment.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>Add an action</strong></li>
+        <li>Search for: <code>parse json</code></li>
+        <li>Select <strong>Parse JSON</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Content</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Dynamic Content:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@body('Get_Item_Permissions')</code>
+        </div>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Schema</span>
+        <p style="margin: 8px 0 5px 0;">Click <strong>"Use sample payload to generate schema"</strong> and paste:</p>
+        <div class="code-block" style="font-size: 10px; max-height: 350px; overflow-y: auto;">
+{
+  "d": {
+    "results": [
+      {
+        "Member": {
+          "Title": "John Doe",
+          "PrincipalType": 1
+        },
+        "RoleDefinitionBindings": {
+          "results": [
+            {
+              "Name": "Full Control"
+            },
+            {
+              "Name": "Edit"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 8px 0;">
+            <strong>Field Explanations:</strong><br>
+            • <code>Member.Title</code>: User or group name<br>
+            • <code>PrincipalType</code>: 1 = User, 8 = Group<br>
+            • <code>RoleDefinitionBindings</code>: Array of permission levels (can have multiple!)
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Parse_Permissions</code></p>
+</div>
+
+<!-- ACTION 21 -->
+<div class="action-block" id="action-21">
+    <div class="action-header">
+        <span class="action-number">21</span> ACTION 21: Apply_to_each_Permission (Inner Loop)
+    </div>
+
+    <div class="step-indicator">Location: After Parse_Permissions</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Loop through each permission assignment (user/group) for this item. This is the <strong>inner loop</strong> - for each permission, we'll create a Dataverse record.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>Add an action</strong></li>
+        <li>Search for: <code>apply to each</code></li>
+        <li>Select <strong>Apply to each</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Select an output from previous steps</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@body('Parse_Permissions')?['d']?['results']</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 5px 0;">
+            This is the array of permission assignments for the current item
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Apply_to_each_Permission</code></p>
+
+    <div class="warning-box">
+        <strong>🔄 Nested Loop Alert:</strong>
+        <p>You now have <strong>TWO nested loops</strong>:</p>
+        <ul>
+            <li>Outer: Apply_to_each_Item (loops through files/folders)</li>
+            <li>Inner: Apply_to_each_Permission (loops through users/groups on each item)</li>
+        </ul>
+        <p>Actions 22-25 go INSIDE this inner loop.</p>
+    </div>
+</div>
+
+<!-- ACTION 22 -->
+<div class="action-block" id="action-22">
+    <div class="action-header">
+        <span class="action-number">22</span> ACTION 22: Select_Permission_Names
+    </div>
+
+    <div class="step-indicator">Location: INSIDE Apply_to_each_Permission loop</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Extract just the permission names from the RoleDefinitionBindings array. A user can have MULTIPLE permissions (e.g., both "Full Control" and "Edit"), so we need to extract all of them.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>Add an action</strong> INSIDE Apply_to_each_Permission</li>
+        <li>Search for: <code>select</code></li>
+        <li>Select <strong>Select</strong> (Data Operations)</li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">From</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0; font-size: 11px;">
+<code>@items('Apply_to_each_Permission')?['RoleDefinitionBindings']?['results']</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 5px 0;">
+            This is the array of permission levels for the current user/group
+        </p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Map</span>
+        <p style="margin: 8px 0;">Switch to <strong>Edit in advanced mode</strong> and enter:</p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@item()?['Name']</code>
+        </div>
+        <p style="font-size: 0.9em; color: #0078d4; margin: 8px 0;">
+            <strong>What this does:</strong> Transforms array of permission objects into array of permission name strings
+        </p>
+        <div class="code-block" style="font-size: 11px;">
+Input:  [{"Name": "Full Control"}, {"Name": "Edit"}]
+Output: ["Full Control", "Edit"]
+        </div>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Select_Permission_Names</code></p>
+</div>
+
+<!-- ACTION 23 -->
+<div class="action-block" id="action-23">
+    <div class="action-header">
+        <span class="action-number">23</span> ACTION 23: Join_Permissions
+    </div>
+
+    <div class="step-indicator">Location: After Select_Permission_Names</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Combine the array of permission names into a single comma-separated string. This is the <strong>KEY FEATURE</strong> that allows storing multiple permission levels in one field.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>Add an action</strong></li>
+        <li>Search for: <code>join</code></li>
+        <li>Select <strong>Join</strong> (Data Operations)</li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">From</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@body('Select_Permission_Names')</code>
+        </div>
+        <p style="font-size: 0.9em; color: #666; margin: 5px 0;">
+            This is the array of permission name strings from Action 22
+        </p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Join with</span>
+        <p style="margin: 8px 0;">Enter exactly (including the space): <code>, </code></p>
+        <p style="font-size: 0.9em; color: #0078d4; margin: 5px 0;">
+            <strong>Result:</strong> "Full Control, Edit" or "Read" (depending on permissions)
+        </p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Join_Permissions</code></p>
+
+    <div class="success-box">
+        <strong>✅ Permission Combining Complete!</strong>
+        <p>You've now implemented the Select + Join pattern that combines multiple permission levels into a readable format. This result will be stored in the crad9_permissionlevel field in the next action.</p>
+    </div>
+</div>
+
+<div class="action-block" id="action-24">
+    <div class="action-header">
+        <span class="action-number">24</span> ACTION 24: Create_Permission_Record (CRITICAL)
+    </div>
+
+    <div class="step-indicator">Location: Inside Apply_to_each_Permission loop, after Join_Permissions</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Create a record in Dataverse storing the permission details for this user/group on this item. This is the core output of the entire flow.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>After Join_Permissions, click <strong>Add an action</strong></li>
+        <li>Search for: <code>add a new row</code></li>
+        <li>Select <strong>Add a new row</strong> (Dataverse)</li>
+        <li>Table name: <code>ItemPermissions</code></li>
+    </ol>
+
+    <h4>⚙️ Field Configuration (Show advanced options):</h4>
+
+    <p style="margin: 15px 0;">Configure each field using the <strong>Expression</strong> tab for all complex expressions:</p>
+
+    <div class="field-row">
+        <span class="field-name">1. Name (crad9_name)</span>
+        <div class="expression-box" style="margin: 5px 0; font-size: 11px;">
+<code>@{items('Apply_to_each_Item')?['FileLeafRef']} - @{items('Apply_to_each_Permission')?['Member']?['Title']}</code>
+        </div>
+        <p style="font-size: 0.85em; color: #666;">Example result: "Budget.docx - John Doe"</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">2. Meeting (crad9_Meeting@odata.bind)</span>
+        <div class="expression-box" style="margin: 5px 0; font-size: 11px;">
+<code>/crad9_meetings(@{outputs('Get_Meeting_Record')?['body/crad9_meetingid']})</code>
+        </div>
+        <p style="font-size: 0.85em; color: #666;">Links this permission record to the meeting</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">3. Item URL (crad9_itemurl)</span>
+        <div class="expression-box" style="margin: 5px 0; font-size: 11px;">
+<code>@{outputs('Set_Site_URL')}/@{items('Apply_to_each_Item')?['FileRef']}</code>
+        </div>
+        <p style="font-size: 0.85em; color: #666;">Full URL to the SharePoint item</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">4. Item Name (crad9_itemname)</span>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@items('Apply_to_each_Item')?['FileLeafRef']</code>
+        </div>
+        <p style="font-size: 0.85em; color: #666;">Just the file/folder name</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">5. Item Type (crad9_itemtype)</span>
+        <div class="expression-box" style="margin: 5px 0; font-size: 11px;">
+<code>@if(equals(items('Apply_to_each_Item')?['FSObjType'], 0), 192350000, 192350001)</code>
+        </div>
+        <p style="font-size: 0.85em; color: #666;">192350000 = File, 192350001 = Folder</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">6. Principal Name (crad9_principalname)</span>
+        <div class="expression-box" style="margin: 5px 0; font-size: 11px;">
+<code>@items('Apply_to_each_Permission')?['Member']?['Title']</code>
+        </div>
+        <p style="font-size: 0.85em; color: #666;">User or group name</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">7. Principal Type (crad9_principaltype)</span>
+        <div class="expression-box" style="margin: 5px 0; font-size: 11px;">
+<code>@if(equals(items('Apply_to_each_Permission')?['Member']?['PrincipalType'], 1), 192350000, 192350001)</code>
+        </div>
+        <p style="font-size: 0.85em; color: #666;">192350000 = User, 192350001 = Group</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">8. Permission Level (crad9_permissionlevel) ⭐ KEY FIELD</span>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@body('Join_Permissions')</code>
+        </div>
+        <p style="font-size: 0.85em; color: #0078d4;">This is the combined permission string from Actions 22-23!</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">9. Scanned At (crad9_scannedat)</span>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@utcNow()</code>
+        </div>
+        <p style="font-size: 0.85em; color: #666;">Current timestamp</p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Create_Permission_Record</code></p>
+
+    <div class="success-box">
+        <strong>✅ Core Data Collection Complete!</strong>
+        <p>This action creates the actual permission audit record. Each execution stores one user/group's permissions on one item.</p>
+    </div>
+</div>
+
+<!-- ACTION 25 -->
+<div class="action-block" id="action-25">
+    <div class="action-header">
+        <span class="action-number">25</span> ACTION 25: Increment_Permissions_Counter
+    </div>
+
+    <div class="step-indicator">Location: After Create_Permission_Record (still inside inner loop)</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Increment the counter tracking total permission records created. This will be saved to the scan record at the end.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>Add an action</strong></li>
+        <li>Search for: <code>increment variable</code></li>
+        <li>Select <strong>Increment variable</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Name</span>
+        <p style="margin: 8px 0;">Select: <code>varPermissionsRecorded</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Value</span>
+        <p style="margin: 8px 0;"><code>1</code></p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Increment_Permissions_Counter</code></p>
+
+    <div class="info-box">
+        <strong>🔄 End of Inner Loop:</strong>
+        <p>This is the last action inside Apply_to_each_Permission. The next action (26) goes OUTSIDE the inner loop but still INSIDE the outer loop.</p>
+    </div>
+</div>
+
+<!-- ACTION 26 -->
+<div class="action-block" id="action-26">
+    <div class="action-header">
+        <span class="action-number">26</span> ACTION 26: Increment_Items_Counter
+    </div>
+
+    <div class="step-indicator">Location: After Apply_to_each_Permission loop ends (outside inner loop, inside outer loop)</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Count this item as scanned. This action runs ONCE per item (after all its permissions have been processed), not once per permission.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>Add an action</strong> OUTSIDE the Apply_to_each_Permission loop</li>
+        <li>Make sure you're still INSIDE the Apply_to_each_Item loop</li>
+        <li>Search for: <code>increment variable</code></li>
+        <li>Select <strong>Increment variable</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Name</span>
+        <p style="margin: 8px 0;">Select: <code>varItemsScanned</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Value</span>
+        <p style="margin: 8px 0;"><code>1</code></p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Increment_Items_Counter</code></p>
+
+    <div class="warning-box">
+        <strong>🔄 Placement Critical:</strong>
+        <p>This action must be OUTSIDE the inner loop (Apply_to_each_Permission) but INSIDE the outer loop (Apply_to_each_Item). Check the indentation in the flow designer!</p>
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- SECTION 5: COMPLETION AND ERROR HANDLING (ACTIONS 27-29) -->
+<!-- ========================================================================== -->
+
+<!-- ACTION 27 -->
+<div class="action-block" id="action-27">
+    <div class="action-header">
+        <span class="action-number">27</span> ACTION 27: Update_Scan_Complete
+    </div>
+
+    <div class="step-indicator">Location: OUTSIDE all loops, after Apply_to_each_Item completes</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Update the scan record created in Action 4 to mark it as completed and save the final statistics (items scanned, permissions found, etc.).</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Click <strong>+ New step</strong> OUTSIDE the Apply_to_each_Item loop</li>
+        <li>Make sure you're still INSIDE Try_Scope</li>
+        <li>Search for: <code>update a row</code></li>
+        <li>Select <strong>Update a row</strong> (Dataverse)</li>
+        <li>Table name: <code>Scans</code></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Row ID</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@outputs('Create_Scan_Record')?['body/crad9_scanid']</code>
+        </div>
+        <p style="font-size: 0.85em; color: #666;">References the scan record created in Action 4</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Scan End Time (crad9_scanendtime)</span>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@utcNow()</code>
+        </div>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Status (crad9_status)</span>
+        <p style="margin: 8px 0;">Enter: <code>192350001</code> (Completed)</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Items Scanned (crad9_itemsscanned)</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Dynamic Content:</strong></p>
+        <p style="font-size: 0.9em; margin: 5px 0;">Insert variable: <strong>varItemsScanned</strong></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Broken Permissions Found (crad9_brokenpermissionsfound)</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Dynamic Content:</strong></p>
+        <p style="font-size: 0.9em; margin: 5px 0;">Insert variable: <strong>varBrokenPermissions</strong></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Total Permissions Recorded (crad9_totalpermissionsrecorded)</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Dynamic Content:</strong></p>
+        <p style="font-size: 0.9em; margin: 5px 0;">Insert variable: <strong>varPermissionsRecorded</strong></p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Update_Scan_Complete</code></p>
+
+    <div class="success-box">
+        <strong>🎉 Main Flow Complete!</strong>
+        <p>If the flow reaches this point, the scan was successful. The remaining actions (28-29) handle the error cases.</p>
+    </div>
+</div>
+
+<!-- ACTION 28 -->
+<div class="action-block" id="action-28">
+    <div class="action-header">
+        <span class="action-number">28</span> ACTION 28: Terminate_No_FolderURL
+    </div>
+
+    <div class="step-indicator">Location: INSIDE Condition_Check_FolderURL, in the "If no" branch (from Action 3)</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>Terminate the flow with a clear error message if the meeting record doesn't have a folder URL. This prevents the flow from running with invalid data.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>Go back to Action 3 (Condition_Check_FolderURL)</li>
+        <li>Click <strong>Add an action</strong> in the <strong>"If no"</strong> branch</li>
+        <li>Search for: <code>terminate</code></li>
+        <li>Select <strong>Terminate</strong></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Status</span>
+        <p style="margin: 8px 0;">Select: <code>Failed</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Code</span>
+        <p style="margin: 8px 0;"><code>NO_FOLDER_URL</code></p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Message</span>
+        <p style="margin: 8px 0;"><code>Meeting does not have a folder URL configured. Please set the folder URL in the meeting record.</code></p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Terminate_No_FolderURL</code></p>
+</div>
+
+<!-- ACTION 29 -->
+<div class="action-block" id="action-29">
+    <div class="action-header">
+        <span class="action-number">29</span> ACTION 29: Update_Scan_Failed (Error Handler)
+    </div>
+
+    <div class="step-indicator">Location: INSIDE Catch_Scope (the scope that runs if Try_Scope fails)</div>
+
+    <h4>🎯 Purpose:</h4>
+    <p>If ANY action in Try_Scope fails (SharePoint errors, connection issues, etc.), update the scan record to mark it as failed and log the error.</p>
+
+    <h4>📝 How to Add:</h4>
+    <ol>
+        <li>After the Try_Scope, add a <strong>Scope</strong> action</li>
+        <li>Rename it to: <code>Catch_Scope</code></li>
+        <li>Click the <strong>...</strong> menu on Catch_Scope → <strong>Configure run after</strong></li>
+        <li>UNCHECK "is successful", CHECK "has failed", "is skipped", "has timed out"</li>
+        <li>Click <strong>Done</strong></li>
+        <li>Inside Catch_Scope, add: <strong>Update a row</strong> (Dataverse)</li>
+        <li>Table name: <code>Scans</code></li>
+    </ol>
+
+    <h4>⚙️ Configuration:</h4>
+
+    <div class="field-row">
+        <span class="field-name">Row ID</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@outputs('Create_Scan_Record')?['body/crad9_scanid']</code>
+        </div>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Scan End Time (crad9_scanendtime)</span>
+        <div class="expression-box" style="margin: 5px 0;">
+<code>@utcNow()</code>
+        </div>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Status (crad9_status)</span>
+        <p style="margin: 8px 0;">Enter: <code>192350002</code> (Failed)</p>
+    </div>
+
+    <div class="field-row">
+        <span class="field-name">Error Message (crad9_errormessage)</span>
+        <p style="margin: 8px 0 5px 0;"><strong>Use Expression Tab:</strong></p>
+        <div class="expression-box" style="margin: 5px 0; font-size: 11px;">
+<code>@{result('Try_Scope')}</code>
+        </div>
+        <p style="font-size: 0.85em; color: #666;">Captures full error details from Try_Scope</p>
+    </div>
+
+    <h4>🔧 Rename:</h4>
+    <p>Rename to: <code>Update_Scan_Failed</code></p>
+
+    <div class="error-box">
+        <strong>⚠️ Error Handling Complete:</strong>
+        <p>This completes the Try-Catch error handling. Any failures in the main flow will be logged to Dataverse with full error details.</p>
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- FINAL SUCCESS MESSAGE -->
+<!-- ========================================================================== -->
+
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 12px; margin: 40px 0; text-align: center;">
+    <h2 style="margin: 0 0 20px 0; font-size: 32px;">🎉 Congratulations!</h2>
+    <p style="font-size: 18px; margin: 10px 0;">You've successfully built all <strong>29 actions</strong> of the Permission Scanner flow!</p>
+    <p style="font-size: 14px; margin: 20px 0; opacity: 0.9;">
+        This flow now scans SharePoint folders for broken permissions, filters by depth level, and creates detailed audit records in Dataverse.
+    </p>
+
+    <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin: 0 0 15px 0;">✅ Next Steps:</h3>
+        <ol style="text-align: left; max-width: 600px; margin: 0 auto; line-height: 1.8;">
+            <li><strong>Save the flow</strong> (if not saved yet)</li>
+            <li><strong>Authorize connections</strong> (Dataverse + SharePoint)</li>
+            <li><strong>Test with a sample meeting</strong> (create a test meeting with folder URL)</li>
+            <li><strong>Verify results</strong> in the ItemPermissions table</li>
+            <li><strong>Review scan record</strong> for statistics</li>
+        </ol>
+    </div>
+</div>
+
+<footer style="margin-top: 60px; padding: 30px; background-color: #f0f0f0; border-radius: 8px; text-align: center;">
+    <h3 style="color: #0078d4; margin-top: 0;">🎯 Complete Flow Build Guide</h3>
+    <p><strong>Actions 1-29 with Full Expressions and Code Snippets</strong></p>
+    <p>Version 1.0 | Created: 2026-02-23</p>
+    <p>For: Permission Scanner Flow v1.0.0.12</p>
+    <p style="margin-top: 20px;">
+        <strong>Companion Files:</strong><br>
+        • BUILD_PERMISSION_SCANNER_FLOW_GUIDE.html - Overview and best practices<br>
+        • PermissionScannerFlow_Documentation.html - Technical flow documentation<br>
+        • CONNECTION_AUTHORIZATION_GUIDE.md - Connection troubleshooting
+    </p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Management System - Complete Setup Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav {
+            background: #2c3e50;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .nav a:hover {
+            background: #34495e;
+        }
+
+        main {
+            padding: 2rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        section:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        h4 {
+            color: #555;
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+
+        .status-complete {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-important {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .error-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .step-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        ol.steps {
+            counter-reset: step-counter;
+            list-style: none;
+        }
+
+        ol.steps > li {
+            counter-increment: step-counter;
+            margin: 1.5rem 0;
+            padding-left: 3rem;
+            position: relative;
+        }
+
+        ol.steps > li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+        }
+
+        ul.checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul.checklist li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        ul.checklist li::before {
+            content: '□';
+            position: absolute;
+            left: 0;
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: white;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .screenshot-placeholder {
+            background: #e9ecef;
+            border: 2px dashed #6c757d;
+            padding: 3rem;
+            text-align: center;
+            margin: 1rem 0;
+            border-radius: 4px;
+            color: #6c757d;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+
+        .btn:hover {
+            background: #764ba2;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .progress-tracker {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 2rem 0;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        @media print {
+            .nav, header, footer {
+                display: none;
+            }
+
+            section {
+                page-break-inside: avoid;
+            }
+
+            .step-card {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 0;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .nav ul {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Meeting Management System</h1>
+            <p>Complete Setup & Customization Guide</p>
+            <p style="font-size: 0.9rem; margin-top: 1rem;">Solution Version 1.0.0.12 | Updated: February 22, 2026</p>
+        </header>
+
+        <nav class="nav">
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#prerequisites">Prerequisites</a></li>
+                <li><a href="#import">Import Solution</a></li>
+                <li><a href="#connections">Setup Connections</a></li>
+                <li><a href="#form">Customize Form</a></li>
+                <li><a href="#app">Create App</a></li>
+                <li><a href="#testing">Testing</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- OVERVIEW SECTION -->
+            <section id="overview">
+                <h2>📋 Overview</h2>
+
+                <div class="info-box">
+                    <h4>🎉 What You're Building</h4>
+                    <p>A comprehensive meeting management system integrated with SharePoint and Dataverse that includes:</p>
+                    <ul>
+                        <li><strong>Meeting Management</strong> - Track meetings with automatic SharePoint folder creation</li>
+                        <li><strong>Agenda Items</strong> - Organize agenda with automatic subfolder creation and conflict of interest tracking</li>
+                        <li><strong>Meeting Members</strong> - Manage attendees with roles and RSVP status</li>
+                        <li><strong>Permission Scanner</strong> - Audit SharePoint permissions and track broken inheritance</li>
+                        <li><strong>Conflict of Interest</strong> - Track COI declarations on agenda items</li>
+                    </ul>
+                </div>
+
+                <h3>✅ What's Already Complete</h3>
+                <table>
+                    <tr>
+                        <th>Component</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>Dataverse Tables</td>
+                        <td><span class="status-badge status-complete">✓ Complete</span></td>
+                        <td>Meeting, Agenda Item, Meeting Contact, Scan, Item Permission</td>
+                    </tr>
+                    <tr>
+                        <td>COI Field</td>
+                        <td><span class="status-badge status-complete">✓ Complete</span></td>
+                        <td>Has Conflict of Interest field added to Agenda Item table</td>
+                    </tr>
+                    <tr>
+                        <td>Folder Creation Flows</td>
+                        <td><span class="status-badge status-complete">✓ Complete</span></td>
+                        <td>CreateMeetingSPFolder, CreateAgendaItemSPFolder</td>
+                    </tr>
+                    <tr>
+                        <td>Permission Scanner Flow</td>
+                        <td><span class="status-badge status-complete">✓ Complete</span></td>
+                        <td>ScanMeetingFolderPermissions with permission combining</td>
+                    </tr>
+                    <tr>
+                        <td>Meeting Form</td>
+                        <td><span class="status-badge status-pending">⚠ Needs Setup</span></td>
+                        <td>You'll customize this via Power Apps UI</td>
+                    </tr>
+                    <tr>
+                        <td>Model-Driven App</td>
+                        <td><span class="status-badge status-pending">⚠ Needs Setup</span></td>
+                        <td>You'll create this via Power Apps UI</td>
+                    </tr>
+                </table>
+
+                <h3>⏱️ Time Required</h3>
+                <div class="step-card">
+                    <table>
+                        <tr>
+                            <th>Task</th>
+                            <th>Estimated Time</th>
+                            <th>Difficulty</th>
+                        </tr>
+                        <tr>
+                            <td>Import Solution</td>
+                            <td>5 minutes</td>
+                            <td>Easy</td>
+                        </tr>
+                        <tr>
+                            <td>Authorize Connections</td>
+                            <td>10 minutes</td>
+                            <td>Easy</td>
+                        </tr>
+                        <tr>
+                            <td>Customize Meeting Form</td>
+                            <td>30-45 minutes</td>
+                            <td>Medium</td>
+                        </tr>
+                        <tr>
+                            <td>Create Model-Driven App</td>
+                            <td>20-30 minutes</td>
+                            <td>Medium</td>
+                        </tr>
+                        <tr>
+                            <td>Testing</td>
+                            <td>15 minutes</td>
+                            <td>Easy</td>
+                        </tr>
+                        <tr>
+                            <th>Total</th>
+                            <th>1.5 - 2 hours</th>
+                            <th></th>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+
+            <!-- PREREQUISITES SECTION -->
+            <section id="prerequisites">
+                <h2>🔧 Prerequisites</h2>
+
+                <h3>Required Files</h3>
+                <ul class="checklist">
+                    <li><code>CRMPowerBISharePointIntegration_1_0_0_12_Complete.zip</code> - Solution package to import</li>
+                </ul>
+
+                <h3>Required Permissions</h3>
+                <ul class="checklist">
+                    <li>Power Apps environment access (Dev environment)</li>
+                    <li>System Administrator or System Customizer role in Dataverse</li>
+                    <li>Access to create/edit Power Automate flows</li>
+                    <li>SharePoint site access: <code>https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test</code></li>
+                    <li>Permissions to create connections (Dataverse, SharePoint)</li>
+                </ul>
+
+                <h3>Existing Connections (Optional but Recommended)</h3>
+                <div class="info-box">
+                    <p><strong>If you already have these connections, the setup will be faster:</strong></p>
+                    <ul>
+                        <li>Microsoft Dataverse connection (as DevTestUser@ABCTest179.onmicrosoft.com)</li>
+                        <li>SharePoint connection (to Permission-Scanner-Test site)</li>
+                    </ul>
+                    <p><em>Don't worry if you don't have these - we'll create them during setup!</em></p>
+                </div>
+
+                <h3>Browser Requirements</h3>
+                <ul class="checklist">
+                    <li>Use Microsoft Edge or Google Chrome (recommended)</li>
+                    <li>Enable pop-ups for make.powerapps.com</li>
+                    <li>Stable internet connection</li>
+                </ul>
+            </section>
+
+            <!-- IMPORT SOLUTION SECTION -->
+            <section id="import">
+                <h2>📦 Step 1: Import the Solution</h2>
+                <p><strong>Estimated Time:</strong> 5 minutes</p>
+
+                <div class="step-card">
+                    <h3>Import Process</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Navigate to Power Apps</strong>
+                            <ul>
+                                <li>Open your browser and go to: <a href="https://make.powerapps.com" target="_blank">https://make.powerapps.com</a></li>
+                                <li>Sign in with your credentials</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Select Your Environment</strong>
+                            <ul>
+                                <li>In the top-right corner, click the environment selector</li>
+                                <li>Choose: <strong>Dev</strong></li>
+                            </ul>
+                            <div class="screenshot-placeholder">
+                                📸 Screenshot: Environment selector showing "Dev" selected
+                            </div>
+                        </li>
+
+                        <li>
+                            <strong>Navigate to Solutions</strong>
+                            <ul>
+                                <li>In the left navigation pane, click <strong>Solutions</strong></li>
+                                <li>You should see your existing solutions listed</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Start Import</strong>
+                            <ul>
+                                <li>Click the <strong>Import solution</strong> button at the top</li>
+                                <li>A dialog will appear</li>
+                            </ul>
+                            <div class="screenshot-placeholder">
+                                📸 Screenshot: "Import solution" button highlighted
+                            </div>
+                        </li>
+
+                        <li>
+                            <strong>Upload Solution File</strong>
+                            <ul>
+                                <li>Click <strong>Browse</strong></li>
+                                <li>Navigate to and select: <code>CRMPowerBISharePointIntegration_1_0_0_12_Complete.zip</code></li>
+                                <li>Click <strong>Next</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Review Solution Details</strong>
+                            <ul>
+                                <li>Solution Name: <strong>CRM-Power BI-SharePoint Integration</strong></li>
+                                <li>Version: <strong>1.0.0.12</strong></li>
+                                <li>Review the list of components being imported</li>
+                                <li>Click <strong>Next</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Import</strong>
+                            <ul>
+                                <li>Click <strong>Import</strong></li>
+                                <li>Wait for the import to complete (usually 1-3 minutes)</li>
+                                <li>You'll see a progress indicator</li>
+                            </ul>
+                            <div class="screenshot-placeholder">
+                                📸 Screenshot: Import progress bar showing "Importing..."
+                            </div>
+                        </li>
+
+                        <li>
+                            <strong>Verify Import Success</strong>
+                            <ul>
+                                <li>Wait for the message: <strong>"Solution imported successfully"</strong></li>
+                                <li>Click <strong>Close</strong></li>
+                                <li>You should now see the solution in your solutions list</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="success-box">
+                    <h4>✅ Success Criteria</h4>
+                    <p>Import is successful when:</p>
+                    <ul>
+                        <li>Solution appears in the Solutions list</li>
+                        <li>Solution name: "CRM-Power BI-SharePoint Integration"</li>
+                        <li>Version: 1.0.0.12</li>
+                        <li>No error messages</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <h4>⚠️ Common Issues</h4>
+                    <ul>
+                        <li><strong>Import fails with "Missing dependencies"</strong> - Ensure you're importing to the correct environment with all base tables already created</li>
+                        <li><strong>"File is not a valid solution"</strong> - Verify you're uploading the correct ZIP file</li>
+                        <li><strong>Import hangs/takes too long</strong> - Refresh the page and check Solutions list - import may have completed</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- CONNECTIONS SECTION -->
+            <section id="connections">
+                <h2>🔌 Step 2: Authorize Connections</h2>
+                <p><strong>Estimated Time:</strong> 10 minutes</p>
+
+                <div class="info-box">
+                    <h4>📌 Why This is Important</h4>
+                    <p>Power Automate flows need authorized connections to:</p>
+                    <ul>
+                        <li>Access Dataverse tables (Meeting, Agenda Item, etc.)</li>
+                        <li>Create folders in SharePoint</li>
+                        <li>Read SharePoint permissions</li>
+                    </ul>
+                    <p>Without authorized connections, flows will show "Connector not found" errors.</p>
+                </div>
+
+                <div class="step-card">
+                    <h3>Authorize All Connections</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Open the Solution</strong>
+                            <ul>
+                                <li>In Solutions list, click on <strong>CRM-Power BI-SharePoint Integration</strong></li>
+                                <li>The solution details page will open</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Navigate to Connection References</strong>
+                            <ul>
+                                <li>In the left navigation (Objects pane), click <strong>Connection References</strong></li>
+                                <li>You should see 4 connection references listed</li>
+                            </ul>
+                            <div class="screenshot-placeholder">
+                                📸 Screenshot: Connection References view showing 4 items with "Off" status
+                            </div>
+                        </li>
+
+                        <li>
+                            <strong>Authorize Dataverse Connection</strong>
+                            <ul>
+                                <li>Find the connection reference starting with: <strong>"Microsoft Dataverse SharePointPermissionScan..."</strong></li>
+                                <li>Click on it to open the edit panel</li>
+                                <li>In the <strong>Connection</strong> dropdown, you'll see:
+                                    <ul>
+                                        <li><strong>Option A:</strong> Existing connection (e.g., "DevTestUser@ABCTest179.onmicrosoft.com")</li>
+                                        <li><strong>Option B:</strong> "+ New connection"</li>
+                                    </ul>
+                                </li>
+                                <li><strong>If existing connection available:</strong> Select it from dropdown</li>
+                                <li><strong>If no connection:</strong> Click "+ New connection":
+                                    <ul>
+                                        <li>A new window opens</li>
+                                        <li>Click <strong>Create</strong></li>
+                                        <li>Sign in with your account</li>
+                                        <li>Return to previous window</li>
+                                        <li>Click the refresh icon next to Connection dropdown</li>
+                                        <li>Select the newly created connection</li>
+                                    </ul>
+                                </li>
+                                <li>The panel will automatically save (Save button may be disabled - this is normal)</li>
+                                <li>Close the panel</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Authorize SharePoint Connections (3 connections)</strong>
+                            <ul>
+                                <li>Repeat the process above for each SharePoint connection reference:</li>
+                                <li>1. <strong>"SharePoint CRMPowerBISharePointIntegration-..."</strong> (first one)</li>
+                                <li>2. <strong>"SharePoint CRMPowerBISharePointIntegration-..."</strong> (second one)</li>
+                                <li>3. <strong>"SharePoint SharePointPermissionScanner-e7162"</strong></li>
+                                <li>For each one:
+                                    <ul>
+                                        <li>Click the connection reference</li>
+                                        <li>Select existing SharePoint connection OR create new</li>
+                                        <li>If creating new:
+                                            <ul>
+                                                <li>Click "+ New connection"</li>
+                                                <li>Click <strong>Create</strong></li>
+                                                <li>Sign in if prompted</li>
+                                                <li>Return and select the new connection</li>
+                                            </ul>
+                                        </li>
+                                        <li>Close panel</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Verify All Connections Authorized</strong>
+                            <ul>
+                                <li>Back in Connection References list</li>
+                                <li>Check that all 4 connection references show a connection (not "Off")</li>
+                                <li>Status should change from "Off" to show connection details</li>
+                            </ul>
+                            <div class="screenshot-placeholder">
+                                📸 Screenshot: All 4 connection references showing connected status
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="success-box">
+                    <h4>✅ Success Criteria</h4>
+                    <ul class="checklist">
+                        <li>All 4 connection references show a connection (not "Off")</li>
+                        <li>1 Dataverse connection authorized</li>
+                        <li>3 SharePoint connections authorized (can all use the same SharePoint connection)</li>
+                        <li>No error messages</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <h4>⚠️ Troubleshooting Connections</h4>
+                    <ul>
+                        <li><strong>Save button disabled:</strong> This is normal - connections save automatically</li>
+                        <li><strong>Connection dropdown empty:</strong> Click "+ New connection" to create one</li>
+                        <li><strong>New connection doesn't appear:</strong> Click the refresh icon next to dropdown</li>
+                        <li><strong>Sign-in popup blocked:</strong> Allow popups for make.powerapps.com</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- FORM CUSTOMIZATION SECTION -->
+            <section id="form">
+                <h2>🎨 Step 3: Customize the Meeting Form</h2>
+                <p><strong>Estimated Time:</strong> 30-45 minutes</p>
+
+                <div class="info-box">
+                    <h4>🎯 What You're Creating</h4>
+                    <p>A professional meeting form with 4 organized tabs:</p>
+                    <ul>
+                        <li><strong>Tab 1: Meeting Details</strong> - Basic meeting info and SharePoint integration</li>
+                        <li><strong>Tab 2: Agenda Items</strong> - Manage agenda with COI tracking</li>
+                        <li><strong>Tab 3: Meeting Members</strong> - Track attendees and RSVP status</li>
+                        <li><strong>Tab 4: Permission Scans</strong> - View permission audit history</li>
+                    </ul>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part A: Open the Form Editor</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Navigate to the Meeting Table</strong>
+                            <ul>
+                                <li>In the solution (CRM-Power BI-SharePoint Integration)</li>
+                                <li>In Objects pane, click <strong>Tables</strong></li>
+                                <li>Find and click <strong>Meeting</strong> (logical name: crad9_meeting)</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Open Forms</strong>
+                            <ul>
+                                <li>In the Meeting table details, find the <strong>Forms</strong> section</li>
+                                <li>You should see a form named "Information" or "Main"</li>
+                                <li>Click on it</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Edit Form</strong>
+                            <ul>
+                                <li>Click <strong>Edit form</strong> (or "Edit form in new tab")</li>
+                                <li>The form designer will open</li>
+                                <li>You'll see the default form layout</li>
+                            </ul>
+                            <div class="screenshot-placeholder">
+                                📸 Screenshot: Power Apps form designer with Meeting form open
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part B: Create Tab Structure</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Rename Existing Tab to "Meeting Details"</strong>
+                            <ul>
+                                <li>Click on the first tab (usually called "General" or similar)</li>
+                                <li>In the properties panel on the right, find <strong>Label</strong></li>
+                                <li>Change to: <strong>Meeting Details</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add "Agenda Items" Tab</strong>
+                            <ul>
+                                <li>Click <strong>+ Component</strong> in the left panel</li>
+                                <li>Scroll down and click <strong>1-column tab</strong></li>
+                                <li>A new tab appears on the form</li>
+                                <li>Click on the new tab</li>
+                                <li>In properties panel, set Label: <strong>Agenda Items</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add "Meeting Members" Tab</strong>
+                            <ul>
+                                <li>Click <strong>+ Component</strong> again</li>
+                                <li>Click <strong>1-column tab</strong></li>
+                                <li>Click on the new tab</li>
+                                <li>Set Label: <strong>Meeting Members</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add "Permission Scans" Tab</strong>
+                            <ul>
+                                <li>Click <strong>+ Component</strong> one more time</li>
+                                <li>Click <strong>1-column tab</strong></li>
+                                <li>Click on the new tab</li>
+                                <li>Set Label: <strong>Permission Scans</strong></li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="success-box">
+                        <p><strong>✅ You should now have 4 tabs:</strong> Meeting Details, Agenda Items, Meeting Members, Permission Scans</p>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part C: Configure Meeting Details Tab</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Click on Meeting Details Tab</strong>
+                        </li>
+
+                        <li>
+                            <strong>Add Basic Information Section</strong>
+                            <ul>
+                                <li>If there's already a section, keep it and rename to "Basic Information"</li>
+                                <li>If not, click <strong>+ Component</strong> > <strong>1-column section</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add Fields to the Section</strong>
+                            <ul>
+                                <li>From the left panel, expand <strong>Table columns</strong></li>
+                                <li>Drag these fields onto the form (in this order):
+                                    <ul>
+                                        <li><strong>crad9_newcolumn</strong> (Meeting Name)</li>
+                                        <li><strong>crad9_meetingstartdate</strong> (Meeting Start Date)</li>
+                                        <li><strong>crad9_meetingenddate</strong> (Meeting End Date)</li>
+                                        <li><strong>crad9_level</strong> (Permission Level)</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add SharePoint Integration Section</strong>
+                            <ul>
+                                <li>Below the first section, click <strong>+ Component</strong> > <strong>1-column section</strong></li>
+                                <li>Click the new section, set Label: <strong>SharePoint Integration</strong></li>
+                                <li>Drag these fields into this section:
+                                    <ul>
+                                        <li><strong>crad9_isuserallowedspfolder</strong> (Create SharePoint Folder)</li>
+                                        <li><strong>crad9_spfoldercreated</strong> (SP Folder Created)</li>
+                                        <li><strong>crad9_folderurl</strong> (Folder URL)</li>
+                                        <li><strong>crad9_lastscandate</strong> (Last Scan Date)</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Make Read-Only Fields</strong>
+                            <ul>
+                                <li>Click on <strong>crad9_spfoldercreated</strong> field</li>
+                                <li>In properties, set <strong>Read-only</strong>: Yes</li>
+                                <li>Repeat for:
+                                    <ul>
+                                        <li><strong>crad9_folderurl</strong></li>
+                                        <li><strong>crad9_lastscandate</strong></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part D: Add Agenda Items Subgrid</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Click on "Agenda Items" Tab</strong>
+                        </li>
+
+                        <li>
+                            <strong>Add Subgrid Component</strong>
+                            <ul>
+                                <li>Click <strong>+ Component</strong> in left panel</li>
+                                <li>Search for or scroll to find <strong>Subgrid</strong></li>
+                                <li>Click on <strong>Subgrid</strong></li>
+                                <li>A dialog appears: "Select subgrid data"</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Configure Subgrid</strong>
+                            <ul>
+                                <li><strong>Table:</strong> Select <strong>Agenda Item</strong> (crad9_agendaitem)</li>
+                                <li><strong>Default view:</strong> Select <strong>Active Agenda Items</strong></li>
+                                <li><strong>Show related records:</strong> Yes (automatically filters by parent meeting)</li>
+                                <li>Click <strong>Done</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Customize Subgrid Properties</strong>
+                            <ul>
+                                <li>Click on the subgrid you just added</li>
+                                <li>In properties panel:
+                                    <ul>
+                                        <li><strong>Label:</strong> Agenda Items</li>
+                                        <li><strong>Show label:</strong> Yes</li>
+                                        <li><strong>Enable editing:</strong> Yes (allows inline editing)</li>
+                                        <li><strong>Show quick create:</strong> Yes (allows adding items without leaving form)</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Edit View to Add COI Column</strong>
+                            <ul>
+                                <li>Click <strong>Edit view</strong> (in subgrid properties)</li>
+                                <li>A view designer opens</li>
+                                <li>Click <strong>+ View column</strong></li>
+                                <li>Search for and add: <strong>Has Conflict of Interest</strong> (crad9_hasconflictofinterest)</li>
+                                <li>Arrange columns in this order:
+                                    <ul>
+                                        <li>Sequence</li>
+                                        <li>Name</li>
+                                        <li>Description</li>
+                                        <li>Has Conflict of Interest ⬅️ NEW!</li>
+                                        <li>Folder Created</li>
+                                        <li>SP Folder URL</li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong>Save and close</strong></li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part E: Add Meeting Members Subgrid</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Click on "Meeting Members" Tab</strong>
+                        </li>
+
+                        <li>
+                            <strong>Add Subgrid</strong>
+                            <ul>
+                                <li>Click <strong>+ Component</strong> > <strong>Subgrid</strong></li>
+                                <li><strong>Table:</strong> Select <strong>Meeting Contact</strong> (crad9_meetingcontact)</li>
+                                <li><strong>Default view:</strong> Active Meeting Contacts</li>
+                                <li><strong>Show related records:</strong> Yes</li>
+                                <li>Click <strong>Done</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Configure Subgrid</strong>
+                            <ul>
+                                <li>In properties:
+                                    <ul>
+                                        <li><strong>Label:</strong> Meeting Members</li>
+                                        <li><strong>Enable editing:</strong> Yes</li>
+                                        <li><strong>Show quick create:</strong> Yes</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Customize View Columns</strong>
+                            <ul>
+                                <li>Click <strong>Edit view</strong></li>
+                                <li>Ensure these columns are visible:
+                                    <ul>
+                                        <li>Contact (lookup)</li>
+                                        <li>Role (Organizer/Attendee/Optional)</li>
+                                        <li>RSVP Status</li>
+                                        <li>SP Access Granted</li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong>Save and close</strong></li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part F: Add Permission Scans Subgrid</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Click on "Permission Scans" Tab</strong>
+                        </li>
+
+                        <li>
+                            <strong>Add Subgrid</strong>
+                            <ul>
+                                <li>Click <strong>+ Component</strong> > <strong>Subgrid</strong></li>
+                                <li><strong>Table:</strong> Select <strong>Scan</strong> (crad9_scan)</li>
+                                <li><strong>Default view:</strong> Active Scans</li>
+                                <li><strong>Show related records:</strong> Yes</li>
+                                <li>Click <strong>Done</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Configure Subgrid</strong>
+                            <ul>
+                                <li>In properties:
+                                    <ul>
+                                        <li><strong>Label:</strong> Permission Scan History</li>
+                                        <li><strong>Enable editing:</strong> No (read-only)</li>
+                                        <li><strong>Show quick create:</strong> No</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Customize View Columns</strong>
+                            <ul>
+                                <li>Click <strong>Edit view</strong></li>
+                                <li>Include these columns:
+                                    <ul>
+                                        <li>Name</li>
+                                        <li>Status</li>
+                                        <li>Scan Start Time</li>
+                                        <li>Items Scanned</li>
+                                        <li>Broken Permissions Found</li>
+                                        <li>Total Permissions Recorded</li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong>Save and close</strong></li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part G: Save and Publish the Form</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Save Your Work</strong>
+                            <ul>
+                                <li>Click <strong>Save</strong> button (top right)</li>
+                                <li>Wait for "Saved" confirmation</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Publish the Form</strong>
+                            <ul>
+                                <li>Click <strong>Publish</strong> button (top right)</li>
+                                <li>Wait for "Published successfully" message</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Close Form Designer</strong>
+                            <ul>
+                                <li>Click the <strong>Back</strong> arrow or close the tab</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="success-box">
+                    <h4>✅ Form Customization Complete!</h4>
+                    <ul class="checklist">
+                        <li>Form has 4 tabs</li>
+                        <li>Meeting Details tab shows basic info and SharePoint integration</li>
+                        <li>Agenda Items subgrid includes "Has Conflict of Interest" column</li>
+                        <li>Meeting Members subgrid shows contacts with roles</li>
+                        <li>Permission Scans subgrid shows audit history</li>
+                        <li>Form is saved and published</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- MODEL-DRIVEN APP SECTION -->
+            <section id="app">
+                <h2>📱 Step 4: Create Model-Driven App</h2>
+                <p><strong>Estimated Time:</strong> 20-30 minutes</p>
+
+                <div class="info-box">
+                    <h4>🎯 What You're Creating</h4>
+                    <p>A professional business application with:</p>
+                    <ul>
+                        <li><strong>Organized Navigation</strong> - Easy access to meetings, scans, and contacts</li>
+                        <li><strong>Filtered Views</strong> - See only relevant data (upcoming meetings, recent scans, etc.)</li>
+                        <li><strong>Dashboards</strong> - Visual overview of meeting and permission data</li>
+                        <li><strong>Consistent UX</strong> - Professional interface following Microsoft design standards</li>
+                    </ul>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part A: Create the App</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Start App Creation</strong>
+                            <ul>
+                                <li>Go to <a href="https://make.powerapps.com" target="_blank">https://make.powerapps.com</a></li>
+                                <li>Click <strong>Apps</strong> in the left navigation</li>
+                                <li>Click <strong>+ New app</strong></li>
+                                <li>Select <strong>Model-driven</strong></li>
+                            </ul>
+                            <div class="screenshot-placeholder">
+                                📸 Screenshot: New app menu with "Model-driven" option highlighted
+                            </div>
+                        </li>
+
+                        <li>
+                            <strong>Configure App Properties</strong>
+                            <ul>
+                                <li>A dialog appears</li>
+                                <li><strong>Name:</strong> Meeting Management</li>
+                                <li><strong>Description:</strong> Comprehensive meeting and permission management system</li>
+                                <li>Leave <strong>Use existing solution</strong> selected</li>
+                                <li><strong>Solution:</strong> Select <strong>CRM-Power BI-SharePoint Integration</strong></li>
+                                <li>Click <strong>Create</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Wait for App Designer to Open</strong>
+                            <ul>
+                                <li>The modern app designer will load</li>
+                                <li>You'll see an empty canvas</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part B: Add Pages (Tables)</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Add Meetings Page</strong>
+                            <ul>
+                                <li>Click <strong>+ Add page</strong> (or "+ New page")</li>
+                                <li>Select <strong>Table based view and form</strong></li>
+                                <li>A list of tables appears</li>
+                                <li>Search for and select <strong>Meeting</strong></li>
+                                <li>Check the box next to it</li>
+                                <li>Click <strong>Add</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add Agenda Items Page</strong>
+                            <ul>
+                                <li>Click <strong>+ Add page</strong> again</li>
+                                <li>Select <strong>Table based view and form</strong></li>
+                                <li>Search for and select <strong>Agenda Item</strong></li>
+                                <li>Click <strong>Add</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add Permission Scans Page</strong>
+                            <ul>
+                                <li>Click <strong>+ Add page</strong></li>
+                                <li>Select <strong>Table based view and form</strong></li>
+                                <li>Search for and select <strong>Scan</strong></li>
+                                <li>Click <strong>Add</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add Contacts Page</strong>
+                            <ul>
+                                <li>Click <strong>+ Add page</strong></li>
+                                <li>Select <strong>Table based view and form</strong></li>
+                                <li>Search for and select <strong>Contact</strong> (standard table)</li>
+                                <li>Click <strong>Add</strong></li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="success-box">
+                        <p><strong>✅ You should now see 4 pages in the navigation:</strong> Meeting, Agenda Item, Scan, Contact</p>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part C: Organize Navigation (Optional but Recommended)</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Create Navigation Groups</strong>
+                            <ul>
+                                <li>In the app designer, find the <strong>Navigation</strong> panel (usually on the left)</li>
+                                <li>Click <strong>+ New group</strong></li>
+                                <li>Name it: <strong>Meetings</strong></li>
+                                <li>Drag the "Meeting" and "Agenda Item" pages into this group</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Create Permissions Group</strong>
+                            <ul>
+                                <li>Click <strong>+ New group</strong></li>
+                                <li>Name it: <strong>Permissions</strong></li>
+                                <li>Drag the "Scan" page into this group</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Create Administration Group</strong>
+                            <ul>
+                                <li>Click <strong>+ New group</strong></li>
+                                <li>Name it: <strong>Administration</strong></li>
+                                <li>Drag the "Contact" page into this group</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part D: Add a Dashboard (Optional)</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Add Dashboard Page</strong>
+                            <ul>
+                                <li>Click <strong>+ Add page</strong></li>
+                                <li>Select <strong>Dashboard</strong></li>
+                                <li>Choose <strong>Create a new dashboard</strong></li>
+                                <li>Name: <strong>Meeting Overview</strong></li>
+                                <li>Layout: Select a layout (2 or 3 column recommended)</li>
+                                <li>Click <strong>Add</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add Charts to Dashboard</strong>
+                            <ul>
+                                <li>The dashboard designer opens</li>
+                                <li>You can add charts for:
+                                    <ul>
+                                        <li>Meetings this month (count by week)</li>
+                                        <li>Recent permission scans</li>
+                                        <li>Agenda items with conflicts</li>
+                                    </ul>
+                                </li>
+                                <li><em>This step is optional - you can add charts later</em></li>
+                                <li>Click <strong>Save</strong> and close dashboard designer</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="step-card">
+                    <h3>Part E: Save and Publish App</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Save the App</strong>
+                            <ul>
+                                <li>Click <strong>Save</strong> button (top right)</li>
+                                <li>Wait for "Saved" confirmation</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Publish the App</strong>
+                            <ul>
+                                <li>Click <strong>Publish</strong> button (top right)</li>
+                                <li>Wait for "Published successfully" message</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Test the App</strong>
+                            <ul>
+                                <li>Click <strong>Play</strong> button</li>
+                                <li>The app opens in a new tab</li>
+                                <li>You should see your navigation menu with all pages</li>
+                            </ul>
+                            <div class="screenshot-placeholder">
+                                📸 Screenshot: Meeting Management app showing navigation menu
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="success-box">
+                    <h4>✅ App Creation Complete!</h4>
+                    <ul class="checklist">
+                        <li>App named "Meeting Management"</li>
+                        <li>4 pages added (Meeting, Agenda Item, Scan, Contact)</li>
+                        <li>Navigation organized into groups (optional)</li>
+                        <li>Dashboard added (optional)</li>
+                        <li>App saved and published</li>
+                        <li>App opens successfully when you click Play</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- TESTING SECTION -->
+            <section id="testing">
+                <h2>🧪 Step 5: Test the Complete Solution</h2>
+                <p><strong>Estimated Time:</strong> 15 minutes</p>
+
+                <div class="info-box">
+                    <h4>🎯 Testing Objectives</h4>
+                    <p>Verify that all components work together:</p>
+                    <ul>
+                        <li>Meeting creation triggers folder creation</li>
+                        <li>Agenda items create subfolders automatically</li>
+                        <li>COI tracking works on agenda items</li>
+                        <li>Permission scanner runs and displays results</li>
+                        <li>All data appears correctly in the app</li>
+                    </ul>
+                </div>
+
+                <div class="step-card">
+                    <h3>Test Scenario 1: Create Meeting with Auto-Folder Creation</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Open the Meeting Management App</strong>
+                            <ul>
+                                <li>Go to <a href="https://make.powerapps.com" target="_blank">https://make.powerapps.com</a></li>
+                                <li>Click <strong>Apps</strong></li>
+                                <li>Click on <strong>Meeting Management</strong></li>
+                                <li>App opens</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Create a New Meeting</strong>
+                            <ul>
+                                <li>Click <strong>Meetings</strong> in navigation</li>
+                                <li>Click <strong>+ New</strong></li>
+                                <li>Fill in the form:
+                                    <ul>
+                                        <li><strong>Meeting Name:</strong> Board Meeting Q1-2026</li>
+                                        <li><strong>Meeting Start Date:</strong> Tomorrow at 10:00 AM</li>
+                                        <li><strong>Meeting End Date:</strong> Tomorrow at 11:30 AM</li>
+                                        <li><strong>Permission Level:</strong> 2</li>
+                                        <li><strong>Create SharePoint Folder:</strong> ✅ Yes (check this box)</li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong>Save</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Verify Folder Creation (Wait 1-2 minutes)</strong>
+                            <ul>
+                                <li>Stay on the meeting form</li>
+                                <li>Click <strong>Refresh</strong> button on the form</li>
+                                <li>After 1-2 minutes, check:
+                                    <ul>
+                                        <li><strong>SP Folder Created:</strong> Should change to ✅ Yes</li>
+                                        <li><strong>Folder URL:</strong> Should populate with SharePoint link</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Verify in SharePoint</strong>
+                            <ul>
+                                <li>Click the <strong>Folder URL</strong> link</li>
+                                <li>SharePoint opens in new tab</li>
+                                <li>You should see a folder named "Board Meeting Q1-2026" in the Meetings library</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="success-box">
+                        <h4>✅ Test 1 Passed If:</h4>
+                        <ul class="checklist">
+                            <li>SP Folder Created = Yes</li>
+                            <li>Folder URL is populated</li>
+                            <li>Clicking URL opens SharePoint folder</li>
+                            <li>Folder exists in SharePoint Meetings library</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <h3>Test Scenario 2: Add Agenda Items with COI Tracking</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Navigate to Agenda Items Tab</strong>
+                            <ul>
+                                <li>On the meeting form (from Test 1), click the <strong>Agenda Items</strong> tab</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Create First Agenda Item</strong>
+                            <ul>
+                                <li>Click <strong>+ New Agenda Item</strong> (quick create)</li>
+                                <li>Fill in:
+                                    <ul>
+                                        <li><strong>Name:</strong> Budget Review & Approval</li>
+                                        <li><strong>Sequence:</strong> 1</li>
+                                        <li><strong>Description:</strong> FY2026 budget approval</li>
+                                        <li><strong>Has Conflict of Interest:</strong> No (leave unchecked for now)</li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong>Save and Close</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Create Second Agenda Item with COI</strong>
+                            <ul>
+                                <li>Click <strong>+ New Agenda Item</strong></li>
+                                <li>Fill in:
+                                    <ul>
+                                        <li><strong>Name:</strong> Vendor Selection - XYZ Corp</li>
+                                        <li><strong>Sequence:</strong> 2</li>
+                                        <li><strong>Description:</strong> Selection of primary vendor</li>
+                                        <li><strong>Has Conflict of Interest:</strong> ✅ Yes (CHECK this box)</li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong>Save and Close</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Verify Subfolders Created</strong>
+                            <ul>
+                                <li>Wait 1-2 minutes</li>
+                                <li>Refresh the Agenda Items subgrid</li>
+                                <li>Both items should show <strong>Folder Created = Yes</strong></li>
+                                <li>Click the Folder URL for one of the items</li>
+                                <li>Verify subfolder exists under the meeting folder in SharePoint</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Verify COI Column Visible</strong>
+                            <ul>
+                                <li>In the Agenda Items subgrid, you should see a column: <strong>Has Conflict of Interest</strong></li>
+                                <li>First item shows: No</li>
+                                <li>Second item shows: Yes</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="success-box">
+                        <h4>✅ Test 2 Passed If:</h4>
+                        <ul class="checklist">
+                            <li>2 agenda items created</li>
+                            <li>Both have Folder Created = Yes</li>
+                            <li>Subfolders exist in SharePoint</li>
+                            <li>"Has Conflict of Interest" column visible in subgrid</li>
+                            <li>Second item shows COI = Yes</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <h3>Test Scenario 3: Add Meeting Members</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Navigate to Meeting Members Tab</strong>
+                            <ul>
+                                <li>Click the <strong>Meeting Members</strong> tab</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add an Organizer</strong>
+                            <ul>
+                                <li>Click <strong>+ New Meeting Contact</strong></li>
+                                <li>Fill in:
+                                    <ul>
+                                        <li><strong>Contact:</strong> Select or create a contact</li>
+                                        <li><strong>Role:</strong> Organizer</li>
+                                        <li><strong>RSVP Status:</strong> Accepted</li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong>Save and Close</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Add Attendees</strong>
+                            <ul>
+                                <li>Repeat the process to add 2-3 more members</li>
+                                <li>Set their Role to: <strong>Attendee</strong></li>
+                                <li>Set various RSVP statuses (Pending, Accepted, Declined, Tentative)</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Verify Subgrid</strong>
+                            <ul>
+                                <li>All members appear in the subgrid</li>
+                                <li>Roles and RSVP statuses display correctly</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="step-card">
+                    <h3>Test Scenario 4: Run Permission Scanner</h3>
+                    <ol class="steps">
+                        <li>
+                            <strong>Manually Trigger the Flow</strong>
+                            <ul>
+                                <li>Go to <a href="https://make.powerautomate.com" target="_blank">https://make.powerautomate.com</a></li>
+                                <li>Click <strong>My flows</strong></li>
+                                <li>Find <strong>ScanMeetingFolderPermissions</strong></li>
+                                <li>Click on it</li>
+                                <li>Click <strong>Run</strong></li>
+                                <li>It prompts for <strong>MeetingID</strong></li>
+                                <li>Go back to your meeting form and copy the Meeting ID (GUID from the URL or ID field)</li>
+                                <li>Paste it into the flow input</li>
+                                <li>Click <strong>Run flow</strong></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Monitor Flow Execution</strong>
+                            <ul>
+                                <li>Wait for flow to complete (usually 10-30 seconds)</li>
+                                <li>Check run history - should show "Succeeded"</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>View Results on Meeting Form</strong>
+                            <ul>
+                                <li>Return to the meeting form</li>
+                                <li>Click the <strong>Permission Scans</strong> tab</li>
+                                <li>You should see a new scan record</li>
+                                <li>Verify it shows:
+                                    <ul>
+                                        <li>Status: Completed</li>
+                                        <li>Items Scanned: (number)</li>
+                                        <li>Broken Permissions Found: (number)</li>
+                                        <li>Total Permissions Recorded: (number)</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>View Detailed Permissions</strong>
+                            <ul>
+                                <li>Click on the scan record to open it</li>
+                                <li>There should be a related subgrid showing <strong>Item Permissions</strong></li>
+                                <li>Verify permission levels show combined permissions (e.g., "Full Control, Edit")</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="success-box">
+                        <h4>✅ Test 4 Passed If:</h4>
+                        <ul class="checklist">
+                            <li>Flow runs successfully</li>
+                            <li>Scan record appears on Permission Scans tab</li>
+                            <li>Scan shows Status = Completed</li>
+                            <li>Scan shows counts for items and permissions</li>
+                            <li>Detailed permissions visible with combined permission levels</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="success-box">
+                    <h3>🎉 All Tests Complete!</h3>
+                    <p>If all 4 test scenarios passed, your Meeting Management System is fully functional!</p>
+                </div>
+            </section>
+
+            <!-- TROUBLESHOOTING SECTION -->
+            <section id="troubleshooting">
+                <h2>🔍 Troubleshooting Guide</h2>
+
+                <div class="step-card">
+                    <h3>Issue 1: Folder Not Created After Saving Meeting</h3>
+
+                    <h4>Symptoms:</h4>
+                    <ul>
+                        <li>"SP Folder Created" stays unchecked after 2+ minutes</li>
+                        <li>Folder URL remains empty</li>
+                    </ul>
+
+                    <h4>Diagnosis Steps:</h4>
+                    <ol class="steps">
+                        <li>
+                            <strong>Verify Trigger Field</strong>
+                            <ul>
+                                <li>Open the meeting record</li>
+                                <li>Confirm "Create SharePoint Folder" is ✅ checked</li>
+                                <li>Confirm "SP Folder Created" is unchecked</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Check Flow Status</strong>
+                            <ul>
+                                <li>Go to Power Automate (<a href="https://make.powerautomate.com" target="_blank">make.powerautomate.com</a>)</li>
+                                <li>Click <strong>My flows</strong></li>
+                                <li>Find <strong>CreateMeetingSPFolder</strong></li>
+                                <li>Click on it</li>
+                                <li>Click <strong>Run history</strong></li>
+                                <li>Check if there's a recent run for your meeting</li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <strong>Review Flow Errors</strong>
+                            <ul>
+                                <li>If run exists and shows "Failed", click on it</li>
+                                <li>Review error details</li>
+                                <li>Common errors:
+                                    <ul>
+                                        <li><strong>SharePoint connection unauthorized</strong> - Re-authorize connection</li>
+                                        <li><strong>Folder already exists</strong> - Delete duplicate folder in SharePoint</li>
+                                        <li><strong>Special characters in name</strong> - Meeting name contains /, \, :, or ?</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <h4>Solutions:</h4>
+                    <div class="warning-box">
+                        <ul>
+                            <li><strong>Connection Issue:</strong> Go to Solutions > Connection References > Re-authorize SharePoint connection</li>
+                            <li><strong>Duplicate Folder:</strong> Delete folder from SharePoint, edit meeting to trigger flow again</li>
+                            <li><strong>Special Characters:</strong> Rename meeting to remove invalid characters (/, \, :, ?)</li>
+                            <li><strong>Flow Not Triggering:</strong> Ensure both conditions met: "Create SP Folder" = Yes AND "SP Folder Created" = No</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <h3>Issue 2: Agenda Item Subfolder Not Created</h3>
+
+                    <h4>Symptoms:</h4>
+                    <ul>
+                        <li>Agenda item "Folder Created" stays unchecked</li>
+                        <li>SP Folder URL remains empty</li>
+                    </ul>
+
+                    <h4>Common Causes:</h4>
+                    <ul>
+                        <li>Parent meeting folder doesn't exist yet</li>
+                        <li>Meeting doesn't have "Create SharePoint Folder" enabled</li>
+                        <li>Agenda item created before meeting folder completed</li>
+                    </ul>
+
+                    <h4>Solutions:</h4>
+                    <div class="warning-box">
+                        <ul>
+                            <li><strong>Wait for Meeting Folder:</strong> Ensure parent meeting shows "SP Folder Created" = Yes before adding agenda items</li>
+                            <li><strong>Check Meeting Settings:</strong> Verify meeting has "Create SharePoint Folder" = Yes</li>
+                            <li><strong>Re-trigger Flow:</strong> Edit agenda item (change name slightly), save to trigger flow again</li>
+                            <li><strong>Manual Creation:</strong> If flow keeps failing, create subfolder manually in SharePoint and update the agenda item record</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <h3>Issue 3: Permission Scanner Fails</h3>
+
+                    <h4>Symptoms:</h4>
+                    <ul>
+                        <li>Flow run shows "Failed"</li>
+                        <li>Scan record shows Status = Failed</li>
+                        <li>Error message in scan record</li>
+                    </ul>
+
+                    <h4>Common Errors:</h4>
+                    <table>
+                        <tr>
+                            <th>Error Message</th>
+                            <th>Cause</th>
+                            <th>Solution</th>
+                        </tr>
+                        <tr>
+                            <td>"Folder URL is empty"</td>
+                            <td>Meeting doesn't have folder URL</td>
+                            <td>Ensure meeting folder created first</td>
+                        </tr>
+                        <tr>
+                            <td>"401 Unauthorized"</td>
+                            <td>SharePoint connection not authorized</td>
+                            <td>Re-authorize SharePoint connection</td>
+                        </tr>
+                        <tr>
+                            <td>"404 Not Found"</td>
+                            <td>Folder doesn't exist in SharePoint</td>
+                            <td>Verify folder URL is correct, folder exists</td>
+                        </tr>
+                        <tr>
+                            <td>"Invalid Meeting ID"</td>
+                            <td>Wrong GUID provided</td>
+                            <td>Copy Meeting ID from URL or record</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="step-card">
+                    <h3>Issue 4: COI Field Not Showing on Agenda Item Form</h3>
+
+                    <h4>Symptoms:</h4>
+                    <ul>
+                        <li>"Has Conflict of Interest" column missing from subgrid</li>
+                        <li>Can't set COI when creating agenda items</li>
+                    </ul>
+
+                    <h4>Solutions:</h4>
+                    <div class="warning-box">
+                        <ul>
+                            <li><strong>Field exists but not on form:</strong>
+                                <ol>
+                                    <li>Open Agenda Item table</li>
+                                    <li>Go to Forms section</li>
+                                    <li>Edit the main form</li>
+                                    <li>Drag "Has Conflict of Interest" field onto form</li>
+                                    <li>Save and Publish</li>
+                                </ol>
+                            </li>
+                            <li><strong>Not in subgrid view:</strong>
+                                <ol>
+                                    <li>Edit the Agenda Items subgrid on Meeting form</li>
+                                    <li>Click "Edit view"</li>
+                                    <li>Add "Has Conflict of Interest" column</li>
+                                    <li>Save and close</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <h3>Issue 5: "Connector Not Found" When Editing Flows</h3>
+
+                    <h4>Symptoms:</h4>
+                    <ul>
+                        <li>Opening flow shows error</li>
+                        <li>Actions show yellow warning triangles</li>
+                        <li>Can't save or run flow</li>
+                    </ul>
+
+                    <h4>Solution:</h4>
+                    <div class="warning-box">
+                        <p><strong>This means connections aren't authorized. Follow Step 2 (Authorize Connections) again:</strong></p>
+                        <ol>
+                            <li>Go to Solutions > CRM-Power BI-SharePoint Integration</li>
+                            <li>Click Connection References</li>
+                            <li>For each of 4 connections:
+                                <ul>
+                                    <li>Click the connection reference</li>
+                                    <li>Select or create a connection</li>
+                                    <li>Close the panel</li>
+                                </ul>
+                            </li>
+                            <li>Verify all 4 show connected status</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="error-box">
+                    <h3>🆘 Still Having Issues?</h3>
+                    <p><strong>Check these resources:</strong></p>
+                    <ul>
+                        <li><strong>Flow Run History:</strong> Power Automate > My flows > [Flow name] > Run history - Shows detailed error logs</li>
+                        <li><strong>Solution Health Check:</strong> Solutions > [Your solution] > Solution checker - Identifies issues</li>
+                        <li><strong>Dataverse Logs:</strong> Advanced Find > System Jobs - Shows backend errors</li>
+                        <li><strong>Browser Console:</strong> F12 in browser > Console tab - Shows JavaScript errors</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- FINAL CHECKLIST -->
+            <section id="checklist">
+                <h2>✅ Final Implementation Checklist</h2>
+
+                <div class="progress-tracker">
+                    <h3>Your Progress</h3>
+                    <p>Check off each item as you complete it:</p>
+
+                    <h4>Prerequisites</h4>
+                    <ul class="checklist">
+                        <li>Have solution ZIP file ready</li>
+                        <li>Have Power Apps environment access</li>
+                        <li>Have appropriate permissions</li>
+                    </ul>
+
+                    <h4>Step 1: Import Solution</h4>
+                    <ul class="checklist">
+                        <li>Navigated to make.powerapps.com</li>
+                        <li>Selected Dev environment</li>
+                        <li>Imported solution ZIP file</li>
+                        <li>Solution appears in Solutions list</li>
+                    </ul>
+
+                    <h4>Step 2: Authorize Connections</h4>
+                    <ul class="checklist">
+                        <li>Opened Connection References</li>
+                        <li>Authorized Dataverse connection (1)</li>
+                        <li>Authorized SharePoint connections (3)</li>
+                        <li>All 4 connections show connected status</li>
+                    </ul>
+
+                    <h4>Step 3: Customize Meeting Form</h4>
+                    <ul class="checklist">
+                        <li>Opened Meeting table form editor</li>
+                        <li>Created 4 tabs (Details, Agenda, Members, Scans)</li>
+                        <li>Added fields to Meeting Details tab</li>
+                        <li>Added Agenda Items subgrid with COI column</li>
+                        <li>Added Meeting Members subgrid</li>
+                        <li>Added Permission Scans subgrid</li>
+                        <li>Saved and published form</li>
+                    </ul>
+
+                    <h4>Step 4: Create Model-Driven App</h4>
+                    <ul class="checklist">
+                        <li>Created new model-driven app</li>
+                        <li>Named it "Meeting Management"</li>
+                        <li>Added Meeting page</li>
+                        <li>Added Agenda Item page</li>
+                        <li>Added Scan page</li>
+                        <li>Added Contact page</li>
+                        <li>Organized navigation (optional)</li>
+                        <li>Saved and published app</li>
+                    </ul>
+
+                    <h4>Step 5: Testing</h4>
+                    <ul class="checklist">
+                        <li>Test 1: Created meeting, folder auto-created</li>
+                        <li>Test 2: Added agenda items with COI tracking</li>
+                        <li>Test 3: Added meeting members</li>
+                        <li>Test 4: Ran permission scanner successfully</li>
+                        <li>All tests passed</li>
+                    </ul>
+
+                    <div class="success-box" style="margin-top: 2rem;">
+                        <h3>🎉 Congratulations!</h3>
+                        <p><strong>If you've checked all items above, your Meeting Management System is fully implemented and operational!</strong></p>
+                        <p>You now have a comprehensive solution for:</p>
+                        <ul>
+                            <li>✅ Managing meetings with automatic SharePoint integration</li>
+                            <li>✅ Tracking agenda items with conflict of interest declarations</li>
+                            <li>✅ Managing meeting attendees and RSVP status</li>
+                            <li>✅ Auditing SharePoint permissions with detailed reports</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- QUICK REFERENCE -->
+            <section id="reference">
+                <h2>📚 Quick Reference</h2>
+
+                <div class="step-card">
+                    <h3>Key URLs</h3>
+                    <table>
+                        <tr>
+                            <th>Resource</th>
+                            <th>URL</th>
+                        </tr>
+                        <tr>
+                            <td>Power Apps</td>
+                            <td><a href="https://make.powerapps.com" target="_blank">https://make.powerapps.com</a></td>
+                        </tr>
+                        <tr>
+                            <td>Power Automate</td>
+                            <td><a href="https://make.powerautomate.com" target="_blank">https://make.powerautomate.com</a></td>
+                        </tr>
+                        <tr>
+                            <td>SharePoint Site</td>
+                            <td><a href="https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test" target="_blank">https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test</a></td>
+                        </tr>
+                        <tr>
+                            <td>Meetings Library</td>
+                            <td><a href="https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings" target="_blank">https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings</a></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="step-card">
+                    <h3>Solution Components</h3>
+                    <table>
+                        <tr>
+                            <th>Component</th>
+                            <th>Name</th>
+                            <th>Purpose</th>
+                        </tr>
+                        <tr>
+                            <td>Solution</td>
+                            <td>CRM-Power BI-SharePoint Integration</td>
+                            <td>Container for all components</td>
+                        </tr>
+                        <tr>
+                            <td>App</td>
+                            <td>Meeting Management</td>
+                            <td>User interface</td>
+                        </tr>
+                        <tr>
+                            <td>Table</td>
+                            <td>Meeting (crad9_meeting)</td>
+                            <td>Core meeting records</td>
+                        </tr>
+                        <tr>
+                            <td>Table</td>
+                            <td>Agenda Item (crad9_agendaitem)</td>
+                            <td>Meeting agenda items</td>
+                        </tr>
+                        <tr>
+                            <td>Table</td>
+                            <td>Meeting Contact (crad9_meetingcontact)</td>
+                            <td>Meeting attendees</td>
+                        </tr>
+                        <tr>
+                            <td>Table</td>
+                            <td>Scan (crad9_scan)</td>
+                            <td>Permission scan sessions</td>
+                        </tr>
+                        <tr>
+                            <td>Table</td>
+                            <td>Item Permission (crad9_itempermission)</td>
+                            <td>Detailed permission records</td>
+                        </tr>
+                        <tr>
+                            <td>Flow</td>
+                            <td>CreateMeetingSPFolder</td>
+                            <td>Auto-create meeting folders</td>
+                        </tr>
+                        <tr>
+                            <td>Flow</td>
+                            <td>CreateAgendaItemSPFolder</td>
+                            <td>Auto-create agenda subfolders</td>
+                        </tr>
+                        <tr>
+                            <td>Flow</td>
+                            <td>ScanMeetingFolderPermissions</td>
+                            <td>Audit SharePoint permissions</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="step-card">
+                    <h3>Important Field Names</h3>
+                    <table>
+                        <tr>
+                            <th>Table</th>
+                            <th>Field</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Meeting</td>
+                            <td>crad9_newcolumn</td>
+                            <td>Meeting name</td>
+                        </tr>
+                        <tr>
+                            <td>Meeting</td>
+                            <td>crad9_isuserallowedspfolder</td>
+                            <td>Trigger folder creation</td>
+                        </tr>
+                        <tr>
+                            <td>Meeting</td>
+                            <td>crad9_spfoldercreated</td>
+                            <td>Folder creation status</td>
+                        </tr>
+                        <tr>
+                            <td>Meeting</td>
+                            <td>crad9_folderurl</td>
+                            <td>SharePoint folder URL</td>
+                        </tr>
+                        <tr>
+                            <td>Meeting</td>
+                            <td>crad9_level</td>
+                            <td>Permission scan depth level</td>
+                        </tr>
+                        <tr>
+                            <td>Agenda Item</td>
+                            <td>crad9_hasconflictofinterest</td>
+                            <td><strong>NEW!</strong> COI tracking</td>
+                        </tr>
+                        <tr>
+                            <td>Agenda Item</td>
+                            <td>crad9_foldercreated</td>
+                            <td>Subfolder creation status</td>
+                        </tr>
+                        <tr>
+                            <td>Meeting Contact</td>
+                            <td>crad9_role</td>
+                            <td>Organizer/Attendee/Optional</td>
+                        </tr>
+                        <tr>
+                            <td>Meeting Contact</td>
+                            <td>crad9_rsvpstatus</td>
+                            <td>Pending/Accepted/Declined/Tentative</td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><strong>Meeting Management System - Setup Guide</strong></p>
+            <p>Solution Version: 1.0.0.12 | Document Version: 1.0 | Last Updated: February 22, 2026</p>
+            <p style="margin-top: 1rem;">For support, refer to the Troubleshooting section or contact your system administrator.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Print-friendly button
+        function printGuide() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

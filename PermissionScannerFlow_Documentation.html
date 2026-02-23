@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permission Scanner Flow - Technical Documentation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #0078d4;
+            border-bottom: 3px solid #0078d4;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #005a9e;
+            margin-top: 30px;
+            border-bottom: 2px solid #e1e1e1;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #323130;
+            margin-top: 20px;
+        }
+        .section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .flow-diagram {
+            background-color: #f9f9f9;
+            border-left: 4px solid #0078d4;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .code-block {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .warning {
+            background-color: #fff4ce;
+            border-left: 4px solid #ff8c00;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #dff6dd;
+            border-left: 4px solid #107c10;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .info {
+            background-color: #e8f4fd;
+            border-left: 4px solid #0078d4;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th {
+            background-color: #0078d4;
+            color: white;
+        }
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .step {
+            margin: 20px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        .step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #0078d4;
+            font-weight: bold;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 Permission Scanner Power Automate Flow</h1>
+    <p><strong>Version:</strong> 1.0 | <strong>Created:</strong> February 2026 | <strong>Flow Name:</strong> ScanMeetingFolderPermissions</p>
+
+    <div class="section">
+        <h2>🎯 Overview</h2>
+        <p>The Permission Scanner flow automates the discovery and recording of SharePoint permission inheritance breaks (broken permissions) for meeting folders. It scans all items (files and folders) within a meeting's SharePoint folder, identifies items with unique permissions, and records detailed permission information in Dataverse.</p>
+
+        <div class="info">
+            <strong>Key Capability:</strong> Combines multiple permission levels per user/group (e.g., "Full Control, Edit") instead of recording only the first permission.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📋 Prerequisites</h2>
+        <h3>Dataverse Tables Required:</h3>
+        <ul>
+            <li><strong>crad9_meeting</strong> - Must have columns: crad9_folderurl, crad9_level</li>
+            <li><strong>crad9_scan</strong> - Created by create_permission_scanner_tables.py (12 columns)</li>
+            <li><strong>crad9_itempermission</strong> - Created by create_permission_scanner_tables.py (11 columns)</li>
+        </ul>
+
+        <h3>Connections Required:</h3>
+        <ul>
+            <li><strong>Microsoft Dataverse</strong> - For creating/updating scan and permission records</li>
+            <li><strong>SharePoint Online</strong> - For querying items and permissions via REST API</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🔄 Flow Architecture</h2>
+
+        <div class="flow-diagram">
+<strong>High-Level Flow:</strong>
+
+1. TRIGGER (Manual Button)
+   ↓
+2. TRY SCOPE
+   ├─ Get Meeting Record (Dataverse)
+   ├─ Check if FolderURL exists
+   ├─ Create Scan Record (status: In Progress)
+   ├─ Parse SharePoint Site URL & Folder Path
+   ├─ Fetch All Items from SharePoint (REST API)
+   ├─ Filter: Items with HasUniqueRoleAssignments = true
+   ├─ Filter: Items at depth >= meeting.level
+   ├─ FOR EACH filtered item:
+   │  ├─ Get Item RoleAssignments (permissions)
+   │  ├─ FOR EACH permission assignment:
+   │  │  ├─ Combine all RoleDefinitionBindings (Join with ", ")
+   │  │  ├─ Create crad9_itempermission record
+   │  │  └─ Increment permission counter
+   │  └─ Increment item counter
+   ├─ Update Scan Record (status: Completed, counters updated)
+   └─ (If FolderURL missing) → Terminate with error
+   ↓
+3. CATCH SCOPE (on failure)
+   └─ Update Scan Record (status: Failed, error message)
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔍 Detailed Step-by-Step Execution</h2>
+
+        <div class="step">
+            <h3>Step 1: Trigger - Manual Button Input</h3>
+            <p><strong>Input:</strong> Meeting ID (GUID)</p>
+            <p><strong>Type:</strong> Manual trigger (Button)</p>
+            <div class="code-block">
+{
+  "title": "MeetingID",
+  "type": "string",
+  "description": "GUID of the meeting record to scan"
+}
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Get Meeting Record</h3>
+            <p><strong>Action:</strong> Dataverse Get Item</p>
+            <p><strong>Entity:</strong> crad9_meetings</p>
+            <p><strong>Fields Retrieved:</strong></p>
+            <ul>
+                <li>crad9_meetingid (GUID)</li>
+                <li>crad9_newcolumn (Meeting name)</li>
+                <li>crad9_folderurl (Full SharePoint folder URL)</li>
+                <li>crad9_level (Depth filter: 2 means items at depth 2+)</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Validate Folder URL</h3>
+            <p><strong>Condition:</strong> Check if crad9_folderurl is not null and not empty</p>
+            <div class="warning">
+                <strong>If Missing:</strong> Flow terminates with error: "Meeting does not have a folder URL. Cannot scan permissions."
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Create Scan Session Record</h3>
+            <p><strong>Action:</strong> Dataverse Create Record</p>
+            <p><strong>Entity:</strong> crad9_scan</p>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                    <th>Type</th>
+                </tr>
+                <tr>
+                    <td>crad9_name</td>
+                    <td>Scan - {MeetingName} - {Timestamp}</td>
+                    <td>String</td>
+                </tr>
+                <tr>
+                    <td>crad9_Meeting</td>
+                    <td>/crad9_meetings({MeetingID})</td>
+                    <td>Lookup</td>
+                </tr>
+                <tr>
+                    <td>crad9_folderurl</td>
+                    <td>{Meeting FolderURL}</td>
+                    <td>String</td>
+                </tr>
+                <tr>
+                    <td>crad9_level</td>
+                    <td>{Meeting Level}</td>
+                    <td>Integer</td>
+                </tr>
+                <tr>
+                    <td>crad9_scanstarttime</td>
+                    <td>utcNow()</td>
+                    <td>DateTime</td>
+                </tr>
+                <tr>
+                    <td>crad9_status</td>
+                    <td>192350000 (In Progress)</td>
+                    <td>Picklist</td>
+                </tr>
+                <tr>
+                    <td>crad9_itemsscanned</td>
+                    <td>0</td>
+                    <td>Integer</td>
+                </tr>
+                <tr>
+                    <td>crad9_brokenpermissionsfound</td>
+                    <td>0</td>
+                    <td>Integer</td>
+                </tr>
+                <tr>
+                    <td>crad9_totalpermissionsrecorded</td>
+                    <td>0</td>
+                    <td>Integer</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="step">
+            <h3>Step 5: Parse SharePoint URL Components</h3>
+            <p><strong>Input Example:</strong> https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Q1%202026</p>
+
+            <h4>5.1 - Parse_Folder_URL (Split URL into Array)</h4>
+            <p><strong>Action Type:</strong> Compose</p>
+
+            <div class="code-block">
+<strong>Actual Power Automate Expression:</strong>
+@split(outputs('Get_Meeting_Record')?['body/crad9_folderurl'], '/')
+            </div>
+
+            <h5>Expression Breakdown - Part by Part</h5>
+            <table>
+                <tr>
+                    <th style="width: 40%;">Expression Part</th>
+                    <th>What It Means</th>
+                </tr>
+                <tr>
+                    <td><code>outputs('Get_Meeting_Record')</code></td>
+                    <td>Get the output from the "Get_Meeting_Record" action (the previous step that fetched the meeting from Dataverse)</td>
+                </tr>
+                <tr>
+                    <td><code>?['body/crad9_folderurl']</code></td>
+                    <td>From that output, safely access the <strong>crad9_folderurl</strong> field from the response body<br>
+                        The <code>?</code> means "safe navigation" - won't crash if the field is missing</td>
+                </tr>
+                <tr>
+                    <td><code>split(..., '/')</code></td>
+                    <td>Split the URL string by the <strong>'/'</strong> character into an array of parts</td>
+                </tr>
+            </table>
+
+            <h5>How Split Function Works</h5>
+            <div class="code-block">
+<strong>Input (Full URL from Meeting Record):</strong>
+"https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Q1 2026"
+
+<strong>Split Process:</strong>
+The function finds every '/' character and breaks the string at those points
+
+Original: https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Q1 2026
+          ↓      ↓                              ↓     ↓                         ↓        ↓
+Split at: /      /                              /     /                         /        /
+Result:   Part0  Part1  Part2                   Part3 Part4                     Part5    Part6
+            </div>
+
+            <h5>Output Array - Element by Element</h5>
+            <table>
+                <tr>
+                    <th>Index</th>
+                    <th>Value</th>
+                    <th>Explanation</th>
+                    <th>Where It's Used</th>
+                </tr>
+                <tr>
+                    <td><strong>[0]</strong></td>
+                    <td>"https:"</td>
+                    <td>The protocol part before the first '/'<br>
+                        Original: <code>https<strong>/</strong>//...</code></td>
+                    <td>Used in <strong>Set_Site_URL</strong> to rebuild the protocol</td>
+                </tr>
+                <tr>
+                    <td><strong>[1]</strong></td>
+                    <td>"" (empty string)</td>
+                    <td>Between the two slashes in '://<strong>/</strong>'<br>
+                        Original: <code>https:/<strong>/</strong>/...</code></td>
+                    <td>Not used (empty because of double slash)</td>
+                </tr>
+                <tr>
+                    <td><strong>[2]</strong></td>
+                    <td>"ABCTest179.sharepoint.com"</td>
+                    <td>The domain name between '//' and '/sites'<br>
+                        Original: <code>//ABCTest179.sharepoint.com<strong>/</strong>sites...</code></td>
+                    <td>Used in <strong>Set_Site_URL</strong> to rebuild the domain</td>
+                </tr>
+                <tr>
+                    <td><strong>[3]</strong></td>
+                    <td>"sites"</td>
+                    <td>The SharePoint path segment<br>
+                        Original: <code>.../sites<strong>/</strong>Permission...</code></td>
+                    <td>Used in <strong>Set_Site_URL</strong> (hardcoded as "/sites/" in expression)</td>
+                </tr>
+                <tr>
+                    <td><strong>[4]</strong></td>
+                    <td>"Permission-Scanner-Test"</td>
+                    <td>The SharePoint site name<br>
+                        Original: <code>.../Permission-Scanner-Test<strong>/</strong>Meetings...</code></td>
+                    <td>Used in <strong>Set_Site_URL</strong> to complete the site URL</td>
+                </tr>
+                <tr>
+                    <td><strong>[5]</strong></td>
+                    <td>"Meetings"</td>
+                    <td>The document library name<br>
+                        Original: <code>.../Meetings<strong>/</strong>Q1 2026</code></td>
+                    <td>Used in <strong>Set_Folder_Path</strong> (part of folder path)</td>
+                </tr>
+                <tr>
+                    <td><strong>[6]</strong></td>
+                    <td>"Q1 2026"</td>
+                    <td>The folder name (end of URL, no slash after it)<br>
+                        Original: <code>.../Q1 2026</code></td>
+                    <td>Used in <strong>Set_Folder_Path</strong> (part of folder path)</td>
+                </tr>
+            </table>
+
+            <h5>Visual Representation</h5>
+            <div class="code-block">
+<strong>Original URL:</strong>
+https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Q1 2026
+│      ││                         │     │                        │        │
+│      ││                         │     │                        │        └─ [6] "Q1 2026"
+│      ││                         │     │                        └────────── [5] "Meetings"
+│      ││                         │     └───────────────────────────────── [4] "Permission-Scanner-Test"
+│      ││                         └──────────────────────────────────────── [3] "sites"
+│      │└──────────────────────────────────────────────────────────────── [2] "ABCTest179.sharepoint.com"
+│      └───────────────────────────────────────────────────────────────── [1] "" (empty)
+└──────────────────────────────────────────────────────────────────────── [0] "https:"
+
+<strong>After split() function:</strong>
+Array with 7 elements (indexed 0-6):
+[
+  [0] = "https:",
+  [1] = "",
+  [2] = "ABCTest179.sharepoint.com",
+  [3] = "sites",
+  [4] = "Permission-Scanner-Test",
+  [5] = "Meetings",
+  [6] = "Q1 2026"
+]
+            </div>
+
+            <h5>Why Each Element Matters - Detailed Explanation</h5>
+            <div class="info">
+                <strong>Elements [0] through [4] = Site URL</strong>
+                <p style="margin-top: 10px;">These elements will be recombined in Step 5.2 to create:</p>
+                <div class="code-block" style="margin-top: 5px;">
+Result: https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test
+        └─[0]─┘ └─[2]─────────────────────┘       └─[4]─────────────────┘
+
+This becomes the "dataset" parameter for SharePoint HTTP requests
+                </div>
+
+                <strong>Elements [5] through [6] = Folder Path</strong>
+                <p style="margin-top: 10px;">These elements will be joined in Step 5.3 to create:</p>
+                <div class="code-block" style="margin-top: 5px;">
+Result: Meetings/Q1 2026
+        └─[5]──┘ └─[6]─┘
+
+This becomes the $filter parameter to limit items to this folder
+                </div>
+            </div>
+
+            <h5>Real-World Example with Different URL</h5>
+            <div class="warning">
+                <strong>Example: Deeply Nested Folder</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Input URL: "https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/2026/Q1/January/Board"
+
+After split('/'):
+[
+  [0] = "https:",
+  [1] = "",
+  [2] = "ABCTest179.sharepoint.com",
+  [3] = "sites",
+  [4] = "Permission-Scanner-Test",
+  [5] = "Meetings",
+  [6] = "2026",
+  [7] = "Q1",
+  [8] = "January",
+  [9] = "Board"
+]
+
+Site URL (elements 0, 2, 4):
+  → https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test
+
+Folder Path (elements 5+, joined with '/'):
+  → Meetings/2026/Q1/January/Board
+                </div>
+            </div>
+
+            <h4>5.2 - Set_Site_URL (Reconstruct Site URL)</h4>
+            <p><strong>Action Type:</strong> Compose</p>
+
+            <div class="code-block">
+<strong>Actual Power Automate Expression:</strong>
+@{outputs('Parse_Folder_URL')[0]}//@{outputs('Parse_Folder_URL')[2]}/sites/@{outputs('Parse_Folder_URL')[4]}
+            </div>
+
+            <h5>Expression Breakdown - Part by Part</h5>
+            <table>
+                <tr>
+                    <th style="width: 50%;">Expression Part</th>
+                    <th>What It Means</th>
+                </tr>
+                <tr>
+                    <td><code>@{outputs('Parse_Folder_URL')[0]}</code></td>
+                    <td>Get element at index [0] from the Parse_Folder_URL output<br>
+                        Result: <strong>"https:"</strong></td>
+                </tr>
+                <tr>
+                    <td><code>//</code></td>
+                    <td>Hardcoded literal string: two forward slashes<br>
+                        This reconstructs the double slash after the protocol</td>
+                </tr>
+                <tr>
+                    <td><code>@{outputs('Parse_Folder_URL')[2]}</code></td>
+                    <td>Get element at index [2] from the Parse_Folder_URL output<br>
+                        Result: <strong>"ABCTest179.sharepoint.com"</strong></td>
+                </tr>
+                <tr>
+                    <td><code>/sites/</code></td>
+                    <td>Hardcoded literal string<br>
+                        SharePoint always uses "/sites/" for site collections</td>
+                </tr>
+                <tr>
+                    <td><code>@{outputs('Parse_Folder_URL')[4]}</code></td>
+                    <td>Get element at index [4] from the Parse_Folder_URL output<br>
+                        Result: <strong>"Permission-Scanner-Test"</strong></td>
+                </tr>
+            </table>
+
+            <h5>How the URL is Reconstructed - Step by Step</h5>
+            <div class="code-block">
+<strong>Step 1: Start with array from Parse_Folder_URL</strong>
+["https:", "", "ABCTest179.sharepoint.com", "sites", "Permission-Scanner-Test", "Meetings", "Q1 2026"]
+  └─[0]─┘ └[1]┘ └──────────[2]──────────┘ └─[3]─┘ └────────[4]───────────┘ └──[5]──┘ └───[6]──┘
+
+<strong>Step 2: Extract needed elements</strong>
+[0] → "https:"
+[2] → "ABCTest179.sharepoint.com"
+[4] → "Permission-Scanner-Test"
+
+<strong>Step 3: Combine with hardcoded separators</strong>
+@{[0]}    //    @{[2]}                       /sites/  @{[4]}
+  ↓        ↓       ↓                            ↓        ↓
+"https:"  "//"  "ABCTest179.sharepoint.com"  "/sites/" "Permission-Scanner-Test"
+
+<strong>Step 4: Result (concatenated string)</strong>
+"https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test"
+            </div>
+
+            <h5>Why We Skip Elements [1] and [3]</h5>
+            <table>
+                <tr>
+                    <th>Skipped Element</th>
+                    <th>Value</th>
+                    <th>Why It's Skipped</th>
+                </tr>
+                <tr>
+                    <td><strong>[1]</strong></td>
+                    <td>"" (empty string)</td>
+                    <td>This was created by the double slash in "https://". We hardcode "//" instead of using this empty element.</td>
+                </tr>
+                <tr>
+                    <td><strong>[3]</strong></td>
+                    <td>"sites"</td>
+                    <td>We hardcode "/sites/" as a literal string. This makes the expression more readable and ensures consistency.</td>
+                </tr>
+            </table>
+
+            <h5>Why This Expression Pattern Was Chosen</h5>
+            <div class="info">
+                <strong>Alternative Approach (NOT Used):</strong>
+                <div class="code-block" style="margin-top: 10px;">
+❌ BAD: @{[0]}/@{[1]}/@{[2]}/@{[3]}/@{[4]}
+Result: "https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test"
+Problem: Uses empty string [1], harder to read, more elements to track
+                </div>
+
+                <strong>Actual Approach (USED):</strong>
+                <div class="code-block" style="margin-top: 10px;">
+✅ GOOD: @{[0]}//@{[2]}/sites/@{[4]}
+Result: "https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test"
+Benefits:
+  • Skips empty string [1] by hardcoding "//"
+  • Hardcoded "/sites/" makes it clear this builds a SharePoint site URL
+  • Only uses 3 array elements instead of 5
+  • More maintainable and self-documenting
+                </div>
+            </div>
+
+            <h5>Real-World Examples</h5>
+
+            <div class="success">
+                <strong>Example 1: Different SharePoint Tenant</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Original URL: "https://contoso.sharepoint.com/sites/Sales-Reports/Documents/Q4"
+
+After Parse_Folder_URL:
+[0] = "https:"
+[1] = ""
+[2] = "contoso.sharepoint.com"
+[3] = "sites"
+[4] = "Sales-Reports"
+[5] = "Documents"
+[6] = "Q4"
+
+Set_Site_URL builds:
+@{[0]}  //  @{[2]}                   /sites/  @{[4]}
+  ↓      ↓      ↓                       ↓        ↓
+"https:" "//" "contoso.sharepoint.com" "/sites/" "Sales-Reports"
+
+Result: "https://contoso.sharepoint.com/sites/Sales-Reports"
+                </div>
+            </div>
+
+            <div class="warning">
+                <strong>Example 2: Site with Hyphens and Numbers</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Original URL: "https://company123.sharepoint.com/sites/Project-2026-Alpha/Files/Reports/Final"
+
+After Parse_Folder_URL:
+[0] = "https:"
+[2] = "company123.sharepoint.com"
+[4] = "Project-2026-Alpha"
+
+Set_Site_URL builds:
+"https:" + "//" + "company123.sharepoint.com" + "/sites/" + "Project-2026-Alpha"
+
+Result: "https://company123.sharepoint.com/sites/Project-2026-Alpha"
+
+Note: Special characters (hyphens, numbers) in the site name are preserved exactly
+                </div>
+            </div>
+
+            <h5>Where This URL Is Used</h5>
+            <div class="info">
+                The reconstructed Site URL is used as the <strong>"dataset"</strong> parameter in SharePoint HTTP requests:
+
+                <div class="code-block" style="margin-top: 10px;">
+<strong>Step 7 - Send_HTTP_to_SharePoint:</strong>
+{
+  "dataset": "@outputs('Set_Site_URL')",
+  "parameters/method": "GET",
+  "parameters/uri": "_api/web/lists/GetByTitle('Meetings')/items?..."
+}
+
+Full request becomes:
+https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/_api/web/lists/...
+└──────────────── Site URL from Set_Site_URL ──────────────────┘└── Relative URI ──┘
+                </div>
+
+                <strong>Why separate Site URL from URI?</strong>
+                <ul style="margin-top: 10px;">
+                    <li>SharePoint connector requires "dataset" (site URL) and "uri" (relative path) as separate parameters</li>
+                    <li>Allows the same URI to be reused across different SharePoint sites</li>
+                    <li>Power Automate handles authentication per site URL</li>
+                </ul>
+            </div>
+
+            <h4>5.3 - Set_Folder_Path (Extract Folder Path)</h4>
+            <p><strong>Action Type:</strong> Compose</p>
+
+            <div class="code-block">
+<strong>Actual Power Automate Expression:</strong>
+@join(skip(outputs('Parse_Folder_URL'), 5), '/')
+            </div>
+
+            <h5>Expression Breakdown - Part by Part</h5>
+            <table>
+                <tr>
+                    <th style="width: 50%;">Expression Part</th>
+                    <th>What It Means</th>
+                </tr>
+                <tr>
+                    <td><code>outputs('Parse_Folder_URL')</code></td>
+                    <td>Get the array output from Parse_Folder_URL action<br>
+                        Example: ["https:", "", "ABCTest179.sharepoint.com", "sites", "Permission-Scanner-Test", "Meetings", "Q1 2026"]</td>
+                </tr>
+                <tr>
+                    <td><code>skip(..., 5)</code></td>
+                    <td><strong>Skip the first 5 elements</strong> of the array<br>
+                        This removes the site URL parts [0] through [4], keeping only folder path elements</td>
+                </tr>
+                <tr>
+                    <td><code>join(..., '/')</code></td>
+                    <td><strong>Join the remaining array elements</strong> with '/' separator<br>
+                        Converts array back into a single path string</td>
+                </tr>
+            </table>
+
+            <h5>How Skip() Function Works - Step by Step</h5>
+            <div class="code-block">
+<strong>Step 1: Start with the full array</strong>
+["https:", "", "ABCTest179.sharepoint.com", "sites", "Permission-Scanner-Test", "Meetings", "Q1 2026"]
+ └─[0]─┘ └[1]┘ └──────────[2]──────────┘ └─[3]─┘ └────────[4]───────────┘ └──[5]──┘ └───[6]──┘
+ │       │       │                        │       │                         │         │
+ └───────┴───────┴────────────────────────┴───────┴──── skip(5)─────────────┘         │
+                                                        ↓                               │
+                                                   These are                       These are
+                                                   REMOVED                         KEPT
+
+<strong>Step 2: skip(array, 5) removes first 5 elements</strong>
+Original:  [0]      [1]  [2]                      [3]     [4]                    [5]       [6]
+           "https:" ""   "ABCTest179.sharepoint..." "sites" "Permission-Scanner..." "Meetings" "Q1 2026"
+           └───────────────── SKIP THESE (site URL parts) ──────────────────┘    └── KEEP THESE ──┘
+
+After skip(5):  ["Meetings", "Q1 2026"]
+                 └───[0]───┘ └───[1]──┘  (new indexes after skip)
+
+<strong>Step 3: join() combines remaining elements with '/'</strong>
+Array:  ["Meetings", "Q1 2026"]
+         └────┬────┘   └───┬───┘
+              │            │
+              └─────┬──────┘
+                    ↓
+              join with '/'
+                    ↓
+Result: "Meetings/Q1 2026"
+            </div>
+
+            <h5>Why Skip Exactly 5 Elements?</h5>
+            <div class="info">
+                <strong>SharePoint URL Structure is Predictable:</strong>
+                <table style="margin-top: 10px;">
+                    <tr>
+                        <th>Index</th>
+                        <th>Always Contains</th>
+                        <th>Purpose</th>
+                    </tr>
+                    <tr>
+                        <td><strong>[0]</strong></td>
+                        <td>Protocol (https:)</td>
+                        <td rowspan="5">These 5 elements always make up the SharePoint <strong>Site URL</strong><br><br>
+                            They're constant for all folders within the same site, so we skip them to get just the folder path</td>
+                    </tr>
+                    <tr>
+                        <td><strong>[1]</strong></td>
+                        <td>Empty string (from //)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>[2]</strong></td>
+                        <td>Tenant domain</td>
+                    </tr>
+                    <tr>
+                        <td><strong>[3]</strong></td>
+                        <td>Literal "sites"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>[4]</strong></td>
+                        <td>Site name</td>
+                    </tr>
+                    <tr>
+                        <td><strong>[5+]</strong></td>
+                        <td>Library and folder names</td>
+                        <td>These elements form the <strong>folder path</strong> within the site<br>
+                            Variable length depending on folder depth</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h5>Real-World Examples</h5>
+
+            <div class="success">
+                <strong>Example 1: Simple Two-Level Path</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Original URL: "https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Q1 2026"
+
+Parse_Folder_URL output:
+[0] "https:"
+[1] ""
+[2] "ABCTest179.sharepoint.com"
+[3] "sites"
+[4] "Permission-Scanner-Test"
+[5] "Meetings"          ← Start keeping from here
+[6] "Q1 2026"           ← Keep this too
+
+skip(array, 5):
+["Meetings", "Q1 2026"]
+
+join(..., '/'):
+"Meetings/Q1 2026"
+                </div>
+            </div>
+
+            <div class="warning">
+                <strong>Example 2: Deep Nested Folder (5 Levels Deep)</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Original URL: "https://contoso.sharepoint.com/sites/HR/Documents/2026/January/Payroll/Final"
+
+Parse_Folder_URL output:
+[0] "https:"
+[1] ""
+[2] "contoso.sharepoint.com"
+[3] "sites"
+[4] "HR"
+[5] "Documents"         ← Start keeping from here
+[6] "2026"              ← Keep
+[7] "January"           ← Keep
+[8] "Payroll"           ← Keep
+[9] "Final"             ← Keep
+
+skip(array, 5):
+["Documents", "2026", "January", "Payroll", "Final"]
+ └──[0]────┘ └─[1]─┘ └──[2]───┘ └──[3]──┘ └─[4]─┘  (new indexes)
+
+join(..., '/'):
+"Documents/2026/January/Payroll/Final"
+                </div>
+            </div>
+
+            <div class="info">
+                <strong>Example 3: Single-Level Path (Just Library Name)</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Original URL: "https://company.sharepoint.com/sites/Marketing/Shared Documents"
+
+Parse_Folder_URL output:
+[0] "https:"
+[1] ""
+[2] "company.sharepoint.com"
+[3] "sites"
+[4] "Marketing"
+[5] "Shared Documents"   ← Only one element after site URL
+
+skip(array, 5):
+["Shared Documents"]
+
+join(..., '/'):
+"Shared Documents"
+
+Note: join() on a single-element array just returns that element (no slash added)
+                </div>
+            </div>
+
+            <h5>Where This Folder Path Is Used</h5>
+            <div class="info">
+                The folder path is used in the <strong>$filter</strong> parameter of SharePoint REST API calls to limit results to items within this folder:
+
+                <div class="code-block" style="margin-top: 10px;">
+<strong>Step 7 - Send_HTTP_to_SharePoint URI:</strong>
+_api/web/lists/GetByTitle('Meetings')/items
+  ?$select=Id,FileRef,FileLeafRef,FSObjType,Modified,HasUniqueRoleAssignments
+  &$filter=startswith(FileRef,'@{outputs('Set_Folder_Path')}')
+                                      └─── Folder path inserted here ───┘
+  &$top=500
+
+Example with actual values:
+$filter=startswith(FileRef,'Meetings/Q1 2026')
+
+This means: "Only return items where FileRef starts with 'Meetings/Q1 2026'"
+
+Results include:
+  ✓ Meetings/Q1 2026/Agenda.docx                    (direct child)
+  ✓ Meetings/Q1 2026/Subfolder/Report.pdf           (nested child)
+  ✗ Meetings/Q2 2026/File.pdf                       (different folder)
+  ✗ Other Library/Q1 2026/File.pdf                  (different library)
+                </div>
+            </div>
+
+            <h5>Edge Cases and Special Scenarios</h5>
+            <table>
+                <tr>
+                    <th>Scenario</th>
+                    <th>URL Example</th>
+                    <th>Result After skip(5) + join('/')</th>
+                </tr>
+                <tr>
+                    <td><strong>Folder with spaces</strong></td>
+                    <td>.../Meetings/Board Meeting Jan 2026</td>
+                    <td>"Meetings/Board Meeting Jan 2026"<br>
+                        <small>Spaces preserved in folder name</small></td>
+                </tr>
+                <tr>
+                    <td><strong>Folder with special chars</strong></td>
+                    <td>.../Meetings/Finance & Budget</td>
+                    <td>"Meetings/Finance & Budget"<br>
+                        <small>& and other chars preserved</small></td>
+                </tr>
+                <tr>
+                    <td><strong>URL encoded folder</strong></td>
+                    <td>.../Meetings/Q1%202026</td>
+                    <td>"Meetings/Q1 2026"<br>
+                        <small>URL decoded automatically by split()</small></td>
+                </tr>
+                <tr>
+                    <td><strong>Very deep nesting</strong></td>
+                    <td>.../A/B/C/D/E/F/G/H</td>
+                    <td>"A/B/C/D/E/F/G/H"<br>
+                        <small>No limit on depth</small></td>
+                </tr>
+            </table>
+
+            <h5>What If We Skipped a Different Number?</h5>
+            <div class="warning">
+                <strong>Common Mistake: Skipping Wrong Number of Elements</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Array: ["https:", "", "ABCTest179.sharepoint.com", "sites", "Permission-Scanner-Test", "Meetings", "Q1 2026"]
+
+❌ skip(3) - TOO FEW
+Result: ["sites", "Permission-Scanner-Test", "Meetings", "Q1 2026"]
+Problem: Includes site URL parts, not a valid folder path
+
+❌ skip(4) - TOO FEW
+Result: ["Permission-Scanner-Test", "Meetings", "Q1 2026"]
+Problem: Includes site name, not a valid folder path
+
+✅ skip(5) - CORRECT
+Result: ["Meetings", "Q1 2026"]
+Perfect: Only folder path elements
+
+❌ skip(6) - TOO MANY
+Result: ["Q1 2026"]
+Problem: Missing library name "Meetings", incomplete path
+                </div>
+            </div>
+
+            <h4>Summary: URL Parsing Results</h4>
+            <table>
+                <tr>
+                    <th>Component</th>
+                    <th>Expression</th>
+                    <th>Result</th>
+                </tr>
+                <tr>
+                    <td><strong>Original URL</strong></td>
+                    <td>From meeting record</td>
+                    <td>https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Q1%202026</td>
+                </tr>
+                <tr>
+                    <td><strong>Parse_Folder_URL</strong></td>
+                    <td>@split(..., '/')</td>
+                    <td>["https:", "", "ABCTest179.sharepoint.com", "sites", "Permission-Scanner-Test", "Meetings", "Q1 2026"]</td>
+                </tr>
+                <tr>
+                    <td><strong>Set_Site_URL</strong></td>
+                    <td>@{[0]}//@{[2]}/sites/@{[4]}</td>
+                    <td>https://ABCTest179.sharepoint.com/sites/Permission-Scanner-Test</td>
+                </tr>
+                <tr>
+                    <td><strong>Set_Folder_Path</strong></td>
+                    <td>@join(skip(..., 5), '/')</td>
+                    <td>Meetings/Q1 2026</td>
+                </tr>
+            </table>
+
+            <div class="info">
+                <strong>Why this matters:</strong>
+                <ul style="margin-top: 10px;">
+                    <li><strong>Set_Site_URL</strong> is used as the "dataset" parameter for SharePoint HTTP requests</li>
+                    <li><strong>Set_Folder_Path</strong> is used in the $filter parameter to limit items to this folder only</li>
+                    <li>These two components are combined in Step 7 to build the full REST API request</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 6: Initialize Variables</h3>
+            <table>
+                <tr>
+                    <th>Variable Name</th>
+                    <th>Type</th>
+                    <th>Initial Value</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td>varAllItems</td>
+                    <td>Array</td>
+                    <td>[]</td>
+                    <td>Store all SharePoint items</td>
+                </tr>
+                <tr>
+                    <td>varItemsScanned</td>
+                    <td>Integer</td>
+                    <td>0</td>
+                    <td>Count items with broken permissions</td>
+                </tr>
+                <tr>
+                    <td>varPermissionsRecorded</td>
+                    <td>Integer</td>
+                    <td>0</td>
+                    <td>Count permission records created</td>
+                </tr>
+                <tr>
+                    <td>varBrokenPermissions</td>
+                    <td>Integer</td>
+                    <td>0</td>
+                    <td>Count items with unique permissions</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="step">
+            <h3>Step 7: Fetch SharePoint Items (HTTP Request)</h3>
+            <p><strong>Endpoint:</strong> SharePoint REST API</p>
+            <p><strong>Method:</strong> GET</p>
+
+            <h4>Understanding the Request URL</h4>
+            <p>The flow constructs a REST API request using components from Step 5 (URL parsing). Let's break down how the URL is built using your real SharePoint site:</p>
+
+            <div class="info">
+                <strong>Real Example from Your Environment:</strong><br>
+                <strong>Meeting Folder URL:</strong> https://abctest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Q1%202026<br>
+                <strong>Parsed Components:</strong>
+                <ul style="margin-top: 10px;">
+                    <li><strong>Site URL:</strong> https://abctest179.sharepoint.com/sites/Permission-Scanner-Test</li>
+                    <li><strong>Folder Path:</strong> Meetings/Q1 2026 (URL decoded)</li>
+                </ul>
+            </div>
+
+            <h4>Complete HTTP Request Structure</h4>
+            <div class="code-block">
+<strong>Full Request URL:</strong>
+https://abctest179.sharepoint.com/sites/Permission-Scanner-Test/_api/web/lists/GetByTitle('Meetings')/items?$select=Id,FileRef,FileLeafRef,FSObjType,Modified,HasUniqueRoleAssignments&$filter=startswith(FileRef,'Meetings/Q1 2026')&$top=500
+
+<strong>Breaking it down:</strong>
+
+┌─ Site URL (from Step 5) ──────────────────────────────────────────────┐
+│ https://abctest179.sharepoint.com/sites/Permission-Scanner-Test       │
+└────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ↓
+┌─ REST API Endpoint ────────────────────────────────────────────────────┐
+│ /_api/web/lists/GetByTitle('Meetings')/items                          │
+│                                                                        │
+│ • _api/web = SharePoint web object                                    │
+│ • lists/GetByTitle('Meetings') = Get the "Meetings" document library │
+│ • /items = Get all items in that library                             │
+└────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ↓
+┌─ Query Parameters ─────────────────────────────────────────────────────┐
+│ ?$select=Id,FileRef,FileLeafRef,FSObjType,Modified,HasUniqueRole...   │
+│ &$filter=startswith(FileRef,'Meetings/Q1 2026')                       │
+│ &$top=500                                                              │
+└────────────────────────────────────────────────────────────────────────┘
+            </div>
+
+            <h4>Query Parameter Details</h4>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                    <th>Purpose</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td><strong>$select</strong></td>
+                    <td>Id,FileRef,FileLeafRef,FSObjType,Modified,HasUniqueRoleAssignments</td>
+                    <td>Only fetch required fields (faster query)</td>
+                    <td>Instead of returning 50+ fields, we only get 6 fields we need</td>
+                </tr>
+                <tr>
+                    <td><strong>$filter</strong></td>
+                    <td>startswith(FileRef,'Meetings/Q1 2026')</td>
+                    <td>Only return items inside this folder and subfolders</td>
+                    <td>Filters out items in "Meetings/Q2 2026" or "Meetings/Archive"</td>
+                </tr>
+                <tr>
+                    <td><strong>$top</strong></td>
+                    <td>500</td>
+                    <td>Maximum items per request (pagination)</td>
+                    <td>If folder has 1000 items, only first 500 returned (limitation)</td>
+                </tr>
+            </table>
+
+            <h4>Real-World URL Examples</h4>
+
+            <div class="success">
+                <strong>Example 1: Basic Meeting Folder</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Meeting URL: https://abctest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Board%20Meeting%20Jan%202026
+
+Parsed Components:
+  Site URL: https://abctest179.sharepoint.com/sites/Permission-Scanner-Test
+  Folder Path: Meetings/Board Meeting Jan 2026
+
+HTTP Request:
+  GET https://abctest179.sharepoint.com/sites/Permission-Scanner-Test/_api/web/lists/GetByTitle('Meetings')/items?$filter=startswith(FileRef,'Meetings/Board Meeting Jan 2026')&$top=500
+
+What this returns:
+  ✓ Meetings/Board Meeting Jan 2026/Agenda.docx
+  ✓ Meetings/Board Meeting Jan 2026/Minutes.pdf
+  ✓ Meetings/Board Meeting Jan 2026/Attachments/Report.xlsx
+  ✗ Meetings/Other Meeting/File.pdf (filtered out - different folder)
+                </div>
+            </div>
+
+            <div class="warning">
+                <strong>Example 2: Nested Subfolders</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Meeting URL: https://abctest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/2026/Q1/January
+
+Parsed Components:
+  Site URL: https://abctest179.sharepoint.com/sites/Permission-Scanner-Test
+  Folder Path: Meetings/2026/Q1/January
+
+HTTP Request:
+  GET https://abctest179.sharepoint.com/sites/Permission-Scanner-Test/_api/web/lists/GetByTitle('Meetings')/items?$filter=startswith(FileRef,'Meetings/2026/Q1/January')&$top=500
+
+What this returns:
+  ✓ Meetings/2026/Q1/January/Meeting1/Agenda.docx (depth 1)
+  ✓ Meetings/2026/Q1/January/Meeting2/Subfolder/File.pdf (depth 2)
+  ✗ Meetings/2026/Q1/February/File.pdf (filtered out - different folder)
+  ✗ Meetings/2025/Q1/January/File.pdf (filtered out - different year)
+                </div>
+            </div>
+
+            <div class="info">
+                <strong>Example 3: Special Characters in Folder Names</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Meeting URL: https://abctest179.sharepoint.com/sites/Permission-Scanner-Test/Meetings/Q1%202026%20-%20Finance%20%26%20Budget
+
+URL Encoded: Q1%202026%20-%20Finance%20%26%20Budget
+URL Decoded: Q1 2026 - Finance & Budget
+
+Parsed Components:
+  Site URL: https://abctest179.sharepoint.com/sites/Permission-Scanner-Test
+  Folder Path: Meetings/Q1 2026 - Finance & Budget (decoded)
+
+HTTP Request:
+  GET https://abctest179.sharepoint.com/sites/Permission-Scanner-Test/_api/web/lists/GetByTitle('Meetings')/items?$filter=startswith(FileRef,'Meetings/Q1 2026 - Finance & Budget')&$top=500
+
+Note: The $filter uses decoded path, SharePoint handles encoding internally
+                </div>
+            </div>
+
+            <h4>Response Fields Explained</h4>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Example Value</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><strong>Id</strong></td>
+                    <td>Integer</td>
+                    <td>123</td>
+                    <td>Unique SharePoint list item ID (used to fetch permissions in Step 11)</td>
+                </tr>
+                <tr>
+                    <td><strong>FileRef</strong></td>
+                    <td>String</td>
+                    <td>/sites/Permission-Scanner-Test/Meetings/Q1 2026/Agenda.docx</td>
+                    <td>Server-relative path (starts with /sites/...)</td>
+                </tr>
+                <tr>
+                    <td><strong>FileLeafRef</strong></td>
+                    <td>String</td>
+                    <td>Agenda.docx</td>
+                    <td>Just the file/folder name (no path)</td>
+                </tr>
+                <tr>
+                    <td><strong>FSObjType</strong></td>
+                    <td>Integer</td>
+                    <td>0 or 1</td>
+                    <td>0 = File, 1 = Folder (determines icon/display)</td>
+                </tr>
+                <tr>
+                    <td><strong>Modified</strong></td>
+                    <td>DateTime</td>
+                    <td>2026-02-20T14:30:00Z</td>
+                    <td>Last modified timestamp (for audit trail)</td>
+                </tr>
+                <tr>
+                    <td><strong>HasUniqueRoleAssignments</strong></td>
+                    <td>Boolean</td>
+                    <td>true or false</td>
+                    <td>true = Broken inheritance (unique permissions)<br>false = Inherits from parent</td>
+                </tr>
+            </table>
+
+            <h4>FileRef vs FileLeafRef - Visual Example</h4>
+            <div class="code-block">
+Given this SharePoint structure:
+
+📁 Permission-Scanner-Test (site)
+  └─ 📁 Meetings (library)
+      └─ 📁 Q1 2026 (folder)
+          ├─ 📄 Agenda.docx (file)
+          ├─ 📄 Minutes.pdf (file)
+          └─ 📁 Attachments (subfolder)
+              └─ 📄 Budget.xlsx (file)
+
+API Response for "Budget.xlsx":
+{
+  "Id": 456,
+  "FileRef": "/sites/Permission-Scanner-Test/Meetings/Q1 2026/Attachments/Budget.xlsx",
+           └─────────────────┬────────────────┘ └──────────┬─────────┘ └─────┬────┘ └────┬────┘
+                         Site Path              Library      Folder    Subfolder  Filename
+
+  "FileLeafRef": "Budget.xlsx",
+                 └────┬────┘
+                 Filename only
+
+  "FSObjType": 0,  ← File (not folder)
+  "HasUniqueRoleAssignments": true  ← Has broken permissions (scanned!)
+}
+            </div>
+
+            <h4>What Happens When $top=500 Limit is Reached</h4>
+            <div class="warning">
+                <strong>Current Limitation:</strong> If your meeting folder has more than 500 items (files + folders), only the first 500 will be scanned.
+
+                <div class="code-block" style="margin-top: 10px;">
+Scenario: Meeting folder has 750 items
+
+Request: .../items?$filter=startswith(FileRef,'Meetings/Q1 2026')&$top=500
+Returns: First 500 items only
+
+Items 501-750: NOT scanned (limitation)
+
+Future Enhancement: Implement pagination using $skiptoken to fetch remaining items
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 8: Parse JSON Response</h3>
+            <p><strong>Schema:</strong> SharePoint OData response</p>
+            <div class="code-block">
+{
+  "d": {
+    "results": [
+      {
+        "Id": 123,
+        "FileRef": "/sites/Site/Meetings/Q1 2026/Document.docx",
+        "FileLeafRef": "Document.docx",
+        "FSObjType": 0,
+        "HasUniqueRoleAssignments": true
+      }
+    ]
+  }
+}
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 9: Filter - Broken Permissions Only</h3>
+            <p><strong>Action:</strong> Query (Filter Array)</p>
+            <p><strong>Condition:</strong> HasUniqueRoleAssignments = true</p>
+            <div class="info">
+                This filter removes all items that inherit permissions from parent folders, leaving only items with unique permission assignments (broken inheritance).
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 10: Filter - Level (Depth) Check</h3>
+            <p><strong>Action:</strong> Select (Transform Array)</p>
+            <p><strong>Action Name:</strong> Filter_By_Level</p>
+
+            <h4>Actual Power Automate Expression</h4>
+            <div class="code-block">
+<strong>From:</strong> @body('Filter_Broken_Permissions')
+
+<strong>Select:</strong>
+@if(
+  greaterOrEquals(
+    sub(
+      length(split(item()?['FileRef'], '/')),
+      length(split(outputs('Set_Folder_Path'), '/'))
+    ),
+    outputs('Get_Meeting_Record')?['body/crad9_level']
+  ),
+  item(),
+  null
+)
+            </div>
+
+            <h4>Expression Breakdown</h4>
+            <table>
+                <tr>
+                    <th>Part</th>
+                    <th>Expression</th>
+                    <th>What it Does</th>
+                </tr>
+                <tr>
+                    <td><strong>1. Item Depth</strong></td>
+                    <td><code>length(split(item()?['FileRef'], '/'))</code></td>
+                    <td>Count how many "/" separators in item path<br>Example: "/sites/Site/Meetings/Q1/File.pdf" → 5</td>
+                </tr>
+                <tr>
+                    <td><strong>2. Folder Depth</strong></td>
+                    <td><code>length(split(outputs('Set_Folder_Path'), '/'))</code></td>
+                    <td>Count how many "/" separators in folder path<br>Example: "Meetings/Q1 2026" → 2</td>
+                </tr>
+                <tr>
+                    <td><strong>3. Relative Depth</strong></td>
+                    <td><code>sub(itemDepth, folderDepth)</code></td>
+                    <td>Calculate depth relative to meeting folder<br>Example: 5 - 2 = 3</td>
+                </tr>
+                <tr>
+                    <td><strong>4. Compare Level</strong></td>
+                    <td><code>greaterOrEquals(relativeDepth, meeting.level)</code></td>
+                    <td>Check if item is deep enough<br>Example: 3 >= 2 → true</td>
+                </tr>
+                <tr>
+                    <td><strong>5. Return Value</strong></td>
+                    <td><code>if(condition, item(), null)</code></td>
+                    <td>If true: return item<br>If false: return null (filtered out)</td>
+                </tr>
+            </table>
+
+            <h4>Real Example with Your SharePoint Site</h4>
+            <div class="success">
+                <strong>Scenario 1: Item at Correct Depth (INCLUDED)</strong>
+                <div class="code-block" style="margin-top: 10px;">
+<strong>Input Data:</strong>
+  item()?['FileRef'] = "/sites/Permission-Scanner-Test/Meetings/Q1 2026/Subfolder/File.pdf"
+  outputs('Set_Folder_Path') = "Meetings/Q1 2026"
+  outputs('Get_Meeting_Record')?['body/crad9_level'] = 2
+
+<strong>Step-by-Step Calculation:</strong>
+
+1. Item Depth:
+   split("/sites/Permission-Scanner-Test/Meetings/Q1 2026/Subfolder/File.pdf", '/')
+   → ["", "sites", "Permission-Scanner-Test", "Meetings", "Q1 2026", "Subfolder", "File.pdf"]
+   length() → 7
+
+2. Folder Depth:
+   split("Meetings/Q1 2026", '/')
+   → ["Meetings", "Q1 2026"]
+   length() → 2
+
+3. Relative Depth:
+   sub(7, 2) → 5
+
+4. Compare:
+   greaterOrEquals(5, 2) → true  ✓
+
+5. Result:
+   if(true, item(), null) → <strong>item() RETURNED</strong>
+   Item WILL BE SCANNED ✓
+                </div>
+            </div>
+
+            <div class="warning">
+                <strong>Scenario 2: Item Too Shallow (FILTERED OUT)</strong>
+                <div class="code-block" style="margin-top: 10px;">
+<strong>Input Data:</strong>
+  item()?['FileRef'] = "/sites/Permission-Scanner-Test/Meetings/Q1 2026/File.pdf"
+  outputs('Set_Folder_Path') = "Meetings/Q1 2026"
+  outputs('Get_Meeting_Record')?['body/crad9_level'] = 2
+
+<strong>Step-by-Step Calculation:</strong>
+
+1. Item Depth:
+   split("/sites/Permission-Scanner-Test/Meetings/Q1 2026/File.pdf", '/')
+   → ["", "sites", "Permission-Scanner-Test", "Meetings", "Q1 2026", "File.pdf"]
+   length() → 6
+
+2. Folder Depth:
+   split("Meetings/Q1 2026", '/')
+   → ["Meetings", "Q1 2026"]
+   length() → 2
+
+3. Relative Depth:
+   sub(6, 2) → 4
+
+4. Compare:
+   greaterOrEquals(4, 2) → true  ✓
+
+5. Result:
+   if(true, item(), null) → <strong>item() RETURNED</strong>
+   Item WILL BE SCANNED ✓
+
+<strong>Note:</strong> If meeting level was set to 5, then:
+   greaterOrEquals(4, 5) → false
+   Result: null → Item FILTERED OUT ✗
+                </div>
+            </div>
+
+            <h4>Understanding the Level Setting</h4>
+            <div class="info">
+                <strong>What does "Level" mean?</strong>
+                <p style="margin-top: 10px;">The <code>crad9_level</code> field on the meeting record controls the <strong>minimum relative depth</strong> of items to scan.</p>
+
+                <table style="margin-top: 10px;">
+                    <tr>
+                        <th>Level Value</th>
+                        <th>What Gets Scanned</th>
+                        <th>Use Case</th>
+                    </tr>
+                    <tr>
+                        <td><strong>0</strong></td>
+                        <td>Everything (all items at any depth)</td>
+                        <td>Scan all items including root folder itself</td>
+                    </tr>
+                    <tr>
+                        <td><strong>1</strong></td>
+                        <td>Items at depth 1 or deeper</td>
+                        <td>Skip root folder, scan everything inside</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2</strong></td>
+                        <td>Items at depth 2 or deeper</td>
+                        <td>Skip files in root, only scan subfolders and their contents</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3</strong></td>
+                        <td>Items at depth 3 or deeper</td>
+                        <td>Only scan deep nested items (e.g., Meetings/Q1/Jan/File.pdf)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h4>Visual Example: Folder Structure with Level Filtering</h4>
+            <div class="code-block">
+Meeting Folder: /sites/Permission-Scanner-Test/Meetings/Q1 2026
+Folder Path: "Meetings/Q1 2026" (depth = 2)
+
+📁 Meetings/Q1 2026/                              ← Relative Depth: 0
+  ├─ 📄 RootFile.pdf                              ← Relative Depth: 1
+  ├─ 📁 Subfolder1/                               ← Relative Depth: 1
+  │   ├─ 📄 File1.docx                            ← Relative Depth: 2
+  │   └─ 📁 Nested/                               ← Relative Depth: 2
+  │       └─ 📄 File2.xlsx                        ← Relative Depth: 3
+  └─ 📁 Subfolder2/                               ← Relative Depth: 1
+      └─ 📄 File3.pdf                             ← Relative Depth: 2
+
+<strong>Level = 0:</strong> All items scanned (7 items)
+<strong>Level = 1:</strong> RootFile.pdf, Subfolder1/, File1.docx, Nested/, File2.xlsx, Subfolder2/, File3.pdf (7 items)
+<strong>Level = 2:</strong> File1.docx, Nested/, File2.xlsx, File3.pdf (4 items)
+<strong>Level = 3:</strong> File2.xlsx (1 item)
+            </div>
+
+            <h4>Why Use Select Instead of Filter?</h4>
+            <div class="info">
+                <strong>Technical Note:</strong> Power Automate uses <strong>Select</strong> action (not Filter) because:
+                <ul style="margin-top: 10px;">
+                    <li><strong>Select</strong> transforms each item (returns item or null)</li>
+                    <li><strong>Filter</strong> only accepts true/false conditions (can't return null)</li>
+                    <li>Null values are then filtered out in the "Apply to each" loop using the "Condition_Not_Null" check</li>
+                </ul>
+
+                <strong>Two-Step Filtering:</strong>
+                <ol style="margin-top: 10px;">
+                    <li><strong>Select (Filter_By_Level):</strong> Returns item or null based on depth</li>
+                    <li><strong>Foreach (Condition_Not_Null):</strong> Skips null entries, processes valid items</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 11: Loop - Process Each Item</h3>
+            <p><strong>Action:</strong> Apply to each (Foreach loop)</p>
+            <p><strong>Array:</strong> Filtered items from Step 10</p>
+            <p><strong>Sub-Steps:</strong></p>
+
+            <h4>11.1 - Check if Item is Not Null</h4>
+            <p>Skip null entries from level filter</p>
+
+            <h4>11.2 - Increment Broken Permissions Counter</h4>
+            <div class="code-block">
+varBrokenPermissions = varBrokenPermissions + 1
+            </div>
+
+            <h4>11.3 - Get Item Permissions (HTTP Request)</h4>
+            <div class="code-block">
+_api/web/lists/GetByTitle('Meetings')/items({ItemId})/RoleAssignments
+?$expand=RoleDefinitionBindings,Member
+            </div>
+            <p><strong>Returns:</strong> All permission assignments for this item with:</p>
+            <ul>
+                <li><strong>Member:</strong> User or group (Title, PrincipalType)</li>
+                <li><strong>RoleDefinitionBindings:</strong> Array of permissions (Name: "Full Control", "Edit", etc.)</li>
+            </ul>
+
+            <h4>11.4 - Parse Permissions JSON</h4>
+            <div class="code-block">
+{
+  "d": {
+    "results": [
+      {
+        "Member": {
+          "Title": "John Doe",
+          "PrincipalType": 1  // 1=User, 8=Group
+        },
+        "RoleDefinitionBindings": {
+          "results": [
+            {"Name": "Full Control"},
+            {"Name": "Edit"}
+          ]
+        }
+      }
+    ]
+  }
+}
+            </div>
+
+            <h4>11.5 - Loop - Process Each Permission Assignment</h4>
+            <p><strong>Action:</strong> Apply to each (Nested foreach)</p>
+
+            <h5>11.5.1 - Select Permission Names</h5>
+            <p><strong>Action Type:</strong> Select</p>
+            <p><strong>Purpose:</strong> Extract only the permission names from RoleDefinitionBindings</p>
+            <div class="code-block">
+<strong>Actual Expression:</strong>
+
+From: @items('Apply_to_each_Permission')?['RoleDefinitionBindings']?['results']
+Select: @item()?['Name']
+
+<strong>What it does:</strong>
+Transforms an array of role objects into an array of just their names
+
+<strong>Input (RoleDefinitionBindings):</strong>
+[
+  {"Name": "Full Control", "Id": 1073741829, ...},
+  {"Name": "Edit", "Id": 1073741830, ...}
+]
+
+<strong>Output (Permission Names):</strong>
+["Full Control", "Edit"]
+            </div>
+
+            <h5>11.5.2 - Join Permissions (KEY FEATURE)</h5>
+            <p><strong>Action Type:</strong> Join</p>
+            <p><strong>Purpose:</strong> Combine multiple permission levels into a single comma-separated string</p>
+            <div class="code-block">
+<strong>Actual Expression:</strong>
+
+From: @body('Select_Permission_Names')
+JoinWith: ", "
+
+<strong>What it does:</strong>
+Joins array elements with ", " separator (comma + space)
+
+<strong>Input (Array):</strong>
+["Full Control", "Edit"]
+
+<strong>Output (Joined String):</strong>
+"Full Control, Edit"
+
+<strong>Stored in:</strong>
+crad9_permissionlevel field
+            </div>
+            <div class="success">
+                <strong>Critical Feature:</strong> This step combines multiple permission levels into a single string, addressing the user requirement to "combine the permissions and store them as one, not just the first."
+
+                <p style="margin-top: 10px;"><strong>Why this matters:</strong></p>
+                <ul style="margin-top: 5px;">
+                    <li>A user can have MULTIPLE permission levels on the same item (e.g., member of both "Editors" and "Viewers" groups)</li>
+                    <li>Previous approach: Only stored first permission found</li>
+                    <li>Current approach: Stores ALL permissions as "Full Control, Edit, Read"</li>
+                    <li>Provides complete audit trail of all permission grants</li>
+                </ul>
+            </div>
+
+            <h5>11.5.3 - Create Permission Record</h5>
+            <p><strong>Action Type:</strong> Dataverse Create Record</p>
+            <p><strong>Entity:</strong> crad9_itempermissions</p>
+
+            <h6>Actual Field Expressions from Flow</h6>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Power Automate Expression</th>
+                    <th>Example Result</th>
+                </tr>
+                <tr>
+                    <td><strong>crad9_name</strong></td>
+                    <td><code>@{items('Apply_to_each_Item')?['FileLeafRef']} - @{items('Apply_to_each_Permission')?['Member']?['Title']}</code></td>
+                    <td>"Budget.xlsx - John Doe"</td>
+                </tr>
+                <tr>
+                    <td><strong>crad9_Meeting@odata.bind</strong></td>
+                    <td><code>/crad9_meetings(@{outputs('Get_Meeting_Record')?['body/crad9_meetingid']})</code></td>
+                    <td>/crad9_meetings(a1b2c3d4-...)</td>
+                </tr>
+                <tr>
+                    <td><strong>crad9_itemurl</strong></td>
+                    <td><code>@{outputs('Set_Site_URL')}/@{items('Apply_to_each_Item')?['FileRef']}</code></td>
+                    <td>https://abctest179.sharepoint.com/.../Budget.xlsx</td>
+                </tr>
+                <tr>
+                    <td><strong>crad9_itemname</strong></td>
+                    <td><code>@items('Apply_to_each_Item')?['FileLeafRef']</code></td>
+                    <td>"Budget.xlsx"</td>
+                </tr>
+                <tr>
+                    <td><strong>crad9_itemtype</strong></td>
+                    <td><code>@if(equals(items('Apply_to_each_Item')?['FSObjType'], 0), 192350000, 192350001)</code></td>
+                    <td>192350000 (File) or 192350001 (Folder)</td>
+                </tr>
+                <tr>
+                    <td><strong>crad9_principalname</strong></td>
+                    <td><code>@items('Apply_to_each_Permission')?['Member']?['Title']</code></td>
+                    <td>"John Doe"</td>
+                </tr>
+                <tr>
+                    <td><strong>crad9_principaltype</strong></td>
+                    <td><code>@if(equals(items('Apply_to_each_Permission')?['Member']?['PrincipalType'], 1), 192350000, 192350001)</code></td>
+                    <td>192350000 (User) or 192350001 (Group)</td>
+                </tr>
+                <tr>
+                    <td><strong>crad9_permissionlevel</strong></td>
+                    <td><code>@body('Join_Permissions')</code></td>
+                    <td><strong>"Full Control, Edit"</strong> ← Combined!</td>
+                </tr>
+                <tr>
+                    <td><strong>crad9_scannedat</strong></td>
+                    <td><code>@utcNow()</code></td>
+                    <td>2026-02-23T14:30:00Z</td>
+                </tr>
+            </table>
+
+            <h6>Expression Explanations</h6>
+            <div class="info">
+                <strong>OData Bind for Lookup Field:</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Field: crad9_Meeting@odata.bind
+Value: /crad9_meetings(@{meetingGUID})
+
+This is how Power Automate creates a lookup relationship to the parent meeting record.
+The "@odata.bind" suffix tells Dataverse to link this permission record to the meeting.
+                </div>
+
+                <strong>Conditional Type Conversion:</strong>
+                <div class="code-block" style="margin-top: 10px;">
+<strong>Item Type:</strong>
+@if(equals(FSObjType, 0), 192350000, 192350001)
+  • SharePoint FSObjType 0 (File) → Dataverse 192350000
+  • SharePoint FSObjType 1 (Folder) → Dataverse 192350001
+
+<strong>Principal Type:</strong>
+@if(equals(PrincipalType, 1), 192350000, 192350001)
+  • SharePoint PrincipalType 1 (User) → Dataverse 192350000
+  • SharePoint PrincipalType 8 (Group) → Dataverse 192350001
+                </div>
+
+                <strong>Combined Permission Level:</strong>
+                <div class="code-block" style="margin-top: 10px;">
+Field: crad9_permissionlevel
+Value: @body('Join_Permissions')
+
+This stores the output from Step 11.5.2 (Join Permissions)
+Example: "Full Control, Edit, Read"
+
+This is the KEY FEATURE that addresses the requirement to combine multiple permissions.
+                </div>
+            </div>
+
+            <h5>11.5.4 - Increment Permission Counter</h5>
+            <div class="code-block">
+varPermissionsRecorded = varPermissionsRecorded + 1
+            </div>
+
+            <h4>11.6 - Increment Item Counter</h4>
+            <div class="code-block">
+varItemsScanned = varItemsScanned + 1
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 12: Update Scan Record (Success)</h3>
+            <p><strong>Action:</strong> Dataverse Update Record</p>
+            <p><strong>Entity:</strong> crad9_scan</p>
+            <p><strong>Record ID:</strong> From Step 4 output</p>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>crad9_scanendtime</td>
+                    <td>utcNow()</td>
+                </tr>
+                <tr>
+                    <td>crad9_status</td>
+                    <td>192350001 (Completed)</td>
+                </tr>
+                <tr>
+                    <td>crad9_itemsscanned</td>
+                    <td>varItemsScanned</td>
+                </tr>
+                <tr>
+                    <td>crad9_brokenpermissionsfound</td>
+                    <td>varBrokenPermissions</td>
+                </tr>
+                <tr>
+                    <td>crad9_totalpermissionsrecorded</td>
+                    <td>varPermissionsRecorded</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="step">
+            <h3>Step 13: Error Handling (Catch Scope)</h3>
+            <p><strong>Trigger:</strong> If Try Scope fails, is skipped, or times out</p>
+            <p><strong>Action:</strong> Update Scan Record</p>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>crad9_scanendtime</td>
+                    <td>utcNow()</td>
+                </tr>
+                <tr>
+                    <td>crad9_status</td>
+                    <td>192350002 (Failed)</td>
+                </tr>
+                <tr>
+                    <td>crad9_errormessage</td>
+                    <td>Full error details from Try Scope</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Data Flow Summary</h2>
+
+        <table>
+            <tr>
+                <th>Stage</th>
+                <th>Input</th>
+                <th>Output</th>
+                <th>Records Created</th>
+            </tr>
+            <tr>
+                <td>Trigger</td>
+                <td>Meeting ID (GUID)</td>
+                <td>Meeting ID</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Get Meeting</td>
+                <td>Meeting ID</td>
+                <td>Meeting record (folderurl, level)</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Create Scan</td>
+                <td>Meeting data</td>
+                <td>Scan record (In Progress)</td>
+                <td>1 crad9_scan</td>
+            </tr>
+            <tr>
+                <td>Fetch Items</td>
+                <td>Site URL, Folder Path</td>
+                <td>Array of SharePoint items</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Filter Broken</td>
+                <td>All items</td>
+                <td>Items with HasUniqueRoleAssignments=true</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Filter Level</td>
+                <td>Broken permission items</td>
+                <td>Items at depth >= level</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Process Items</td>
+                <td>Filtered items</td>
+                <td>Permission records for each principal</td>
+                <td>N × M crad9_itempermission (N items × M principals)</td>
+            </tr>
+            <tr>
+                <td>Update Scan</td>
+                <td>Counters</td>
+                <td>Scan record (Completed)</td>
+                <td>Update 1 crad9_scan</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>🔢 Picklist Values</h2>
+
+        <h3>crad9_status (Scan Status)</h3>
+        <table>
+            <tr>
+                <th>Label</th>
+                <th>Value</th>
+                <th>Used When</th>
+            </tr>
+            <tr>
+                <td>In Progress</td>
+                <td>192350000</td>
+                <td>Scan created, items being processed</td>
+            </tr>
+            <tr>
+                <td>Completed</td>
+                <td>192350001</td>
+                <td>Scan finished successfully</td>
+            </tr>
+            <tr>
+                <td>Failed</td>
+                <td>192350002</td>
+                <td>Error occurred during scan</td>
+            </tr>
+        </table>
+
+        <h3>crad9_itemtype (Item Type)</h3>
+        <table>
+            <tr>
+                <th>Label</th>
+                <th>Value</th>
+                <th>SharePoint FSObjType</th>
+            </tr>
+            <tr>
+                <td>File</td>
+                <td>192350000</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Folder</td>
+                <td>192350001</td>
+                <td>1</td>
+            </tr>
+        </table>
+
+        <h3>crad9_principaltype (Principal Type)</h3>
+        <table>
+            <tr>
+                <th>Label</th>
+                <th>Value</th>
+                <th>SharePoint PrincipalType</th>
+            </tr>
+            <tr>
+                <td>User</td>
+                <td>192350000</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>Group</td>
+                <td>192350001</td>
+                <td>8 (or others != 1)</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>⚡ Performance Considerations</h2>
+
+        <div class="warning">
+            <strong>Current Limitations:</strong>
+            <ul>
+                <li><strong>Batch Size:</strong> 500 items per request ($top=500)</li>
+                <li><strong>Pagination:</strong> Not implemented (only first 500 items scanned)</li>
+                <li><strong>Nested Loops:</strong> For each item → for each permission assignment</li>
+            </ul>
+        </div>
+
+        <h3>Estimated Execution Time</h3>
+        <table>
+            <tr>
+                <th>Scenario</th>
+                <th>Items</th>
+                <th>Broken Perms</th>
+                <th>Principals/Item</th>
+                <th>Estimated Time</th>
+            </tr>
+            <tr>
+                <td>Small</td>
+                <td>10</td>
+                <td>3</td>
+                <td>2</td>
+                <td>~30 seconds</td>
+            </tr>
+            <tr>
+                <td>Medium</td>
+                <td>50</td>
+                <td>15</td>
+                <td>3</td>
+                <td>~2 minutes</td>
+            </tr>
+            <tr>
+                <td>Large</td>
+                <td>200</td>
+                <td>60</td>
+                <td>4</td>
+                <td>~8 minutes</td>
+            </tr>
+            <tr>
+                <td>Very Large</td>
+                <td>500</td>
+                <td>150</td>
+                <td>5</td>
+                <td>~20 minutes</td>
+            </tr>
+        </table>
+
+        <div class="info">
+            <strong>Optimization Recommendations:</strong>
+            <ul>
+                <li>Implement pagination for folders with >500 items</li>
+                <li>Add batch processing with delays every 50 items</li>
+                <li>Consider async pattern for large scans</li>
+                <li>Add progress updates to scan record (every 10% completion)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🧪 Testing the Flow</h2>
+
+        <h3>Test Scenario 1: Basic Scan</h3>
+        <ol>
+            <li>Create a test meeting with crad9_folderurl = "https://...SharePoint.../Meetings/TestFolder"</li>
+            <li>Set crad9_level = 1 (all items at depth 1+)</li>
+            <li>In SharePoint, break permissions on 2-3 files/folders</li>
+            <li>Grant permissions: User 1 = "Full Control", User 2 = "Edit, Read"</li>
+            <li>Run flow with meeting ID</li>
+            <li>Verify:
+                <ul>
+                    <li>1 crad9_scan record created (status = Completed)</li>
+                    <li>Multiple crad9_itempermission records (one per principal per item)</li>
+                    <li>crad9_permissionlevel contains combined permissions: "Edit, Read"</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Test Scenario 2: Level Filter</h3>
+        <p><strong>Folder Structure:</strong></p>
+        <div class="code-block">
+/Meetings/Q1 2026/          (depth 0)
+  ├─ File1.pdf              (depth 1) ← broken permissions
+  ├─ Subfolder1/            (depth 1)
+  │   ├─ File2.docx         (depth 2) ← broken permissions
+  │   └─ Subfolder2/        (depth 2)
+  │       └─ File3.xlsx     (depth 3) ← broken permissions
+        </div>
+        <p><strong>Test Cases:</strong></p>
+        <table>
+            <tr>
+                <th>Level Setting</th>
+                <th>Expected Items Scanned</th>
+                <th>Explanation</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>File1.pdf, File2.docx, File3.xlsx</td>
+                <td>All items at depth 1+</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>File2.docx, File3.xlsx</td>
+                <td>Only items at depth 2+</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>File3.xlsx</td>
+                <td>Only items at depth 3+</td>
+            </tr>
+        </table>
+
+        <h3>Test Scenario 3: Error Handling</h3>
+        <ol>
+            <li>Create meeting without crad9_folderurl</li>
+            <li>Run flow</li>
+            <li>Verify: Flow terminates with error, no scan record created</li>
+        </ol>
+
+        <ol start="4">
+            <li>Create meeting with invalid SharePoint URL</li>
+            <li>Run flow</li>
+            <li>Verify: Scan record created with status = Failed, error message populated</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2>📦 Solution Import Instructions</h2>
+
+        <h3>Step 1: Add Flow to Solution ZIP</h3>
+        <ol>
+            <li>Extract CRMPowerBISharePointIntegration_Updated.zip</li>
+            <li>Copy PermissionScanner-ScanMeetingFolderPermissions-NEWGUID.json to Workflows/ folder</li>
+            <li>Update customizations.xml to include the new workflow</li>
+            <li>Re-zip the solution</li>
+        </ol>
+
+        <h3>Step 2: Import to Dataverse</h3>
+        <div class="code-block">
+# Using PAC CLI:
+pac solution import --path CRMPowerBISharePointIntegration_Updated.zip
+        </div>
+
+        <h3>Step 3: Configure Flow</h3>
+        <ol>
+            <li>Go to <a href="https://make.powerautomate.com">https://make.powerautomate.com</a></li>
+            <li>Find "ScanMeetingFolderPermissions" flow</li>
+            <li>Edit flow → Check connection references</li>
+            <li>Fix connections if needed (Dataverse + SharePoint)</li>
+            <li>Turn ON the flow</li>
+        </ol>
+
+        <h3>Step 4: Test Execution</h3>
+        <div class="code-block">
+# Using test script:
+python3 test_permission_scanner.py
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🐛 Troubleshooting</h2>
+
+        <h3>Issue: "Meeting does not have a folder URL"</h3>
+        <p><strong>Cause:</strong> crad9_folderurl field is empty</p>
+        <p><strong>Solution:</strong> Run CreateMeetingSPFolder flow first to populate crad9_folderurl</p>
+
+        <h3>Issue: "List 'Meetings' does not exist"</h3>
+        <p><strong>Cause:</strong> SharePoint document library not found</p>
+        <p><strong>Solution:</strong> Verify "Meetings" library exists at the SharePoint site</p>
+
+        <h3>Issue: No items returned from SharePoint</h3>
+        <p><strong>Possible Causes:</strong></p>
+        <ul>
+            <li>Folder path incorrect (check URL encoding)</li>
+            <li>No items in folder</li>
+            <li>Permission issue (flow user can't access items)</li>
+        </ul>
+        <p><strong>Solution:</strong> Check scan record error message, verify folder URL manually</p>
+
+        <h3>Issue: Permission records created but empty permission level</h3>
+        <p><strong>Cause:</strong> RoleDefinitionBindings array is empty</p>
+        <p><strong>Solution:</strong> Check SharePoint permissions - item may have no explicit permissions granted</p>
+
+        <h3>Issue: Flow times out on large folders</h3>
+        <p><strong>Cause:</strong> Too many items (>500) or too many permission assignments</p>
+        <p><strong>Solution:</strong> Implement pagination or reduce level setting to scan fewer items</p>
+    </div>
+
+    <div class="section">
+        <h2>📝 Future Enhancements</h2>
+
+        <ul>
+            <li>✅ <strong>Implemented:</strong> Combined permission levels (e.g., "Full Control, Edit")</li>
+            <li>✅ <strong>Implemented:</strong> Level-based filtering</li>
+            <li>✅ <strong>Implemented:</strong> Error handling with scan status tracking</li>
+            <li>⬜ <strong>Planned:</strong> Pagination for folders with >500 items</li>
+            <li>⬜ <strong>Planned:</strong> Progress updates during long scans</li>
+            <li>⬜ <strong>Planned:</strong> Email notification on scan completion</li>
+            <li>⬜ <strong>Planned:</strong> Scan comparison (identify permission changes between scans)</li>
+            <li>⬜ <strong>Planned:</strong> Automated scheduling (weekly scans)</li>
+            <li>⬜ <strong>Planned:</strong> Export to Excel report</li>
+        </ul>
+    </div>
+
+    <footer style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e1e1e1; text-align: center; color: #666;">
+        <p><strong>Permission Scanner Flow Documentation</strong> | Version 1.0 | February 2026</p>
+        <p>Created for Meeting Management Solution - CRM Power BI SharePoint Integration</p>
+    </footer>
+</body>
+</html>
